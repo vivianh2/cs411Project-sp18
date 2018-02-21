@@ -1,3 +1,3 @@
-# cs411Project-sp18
-
-一楼
+# READ ME AGAIN
+Project for UIUC CS 411 Database Systems
+https://wiki.illinois.edu/wiki/display/cs411sp18/README.md
