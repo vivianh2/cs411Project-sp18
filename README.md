@@ -3,11 +3,12 @@ Project for UIUC CS 411 Database Systems
 https://wiki.illinois.edu/wiki/display/cs411sp18/README.md
 
 ## Current tech stack
-1. Django with **Python3**  
-⋅⋅⋅Please replace all the `python` commands with `python3` if you have both versions installed and have python2 as default
-2. **SQLite3** (for pure test purpose)
+1. Frontend: React
+2. Backend: Express
+3. Database: MySQL
 
 ## Getting Started  
-1. Clone the project with `git clone https://github.com/vivianh2/cs411Project-sp18.git`
-⋅⋅⋅Please do **NOT** fork  
-2. Run the server with `python manage.py runserver`  
+1. Clone the project with `git clone https://github.com/vivianh2/cs411Project-sp18.git`  
+Please PLEASE do **NOT** fork  
+2. `cd` into the project directory  
+3. Run with `npm start`  
