@@ -14,6 +14,4 @@ Please PLEASE do **NOT** fork
 3. Run with `npm start`  
 
 ## Some useful articles
-Create react app: https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md#folder-structure
-
 Interact react and express: https://daveceddia.com/create-react-app-express-backend/ 
