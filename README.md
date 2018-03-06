@@ -15,4 +15,5 @@ Please PLEASE do **NOT** fork
 
 ## Some useful articles
 Interact react and express: https://daveceddia.com/create-react-app-express-backend/ 
-More about express router: https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/Introduction#Creating_route_handlers
+
+Express router: https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
