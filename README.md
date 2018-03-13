@@ -12,3 +12,8 @@ https://wiki.illinois.edu/wiki/display/cs411sp18/README.md
 Please PLEASE do **NOT** fork  
 2. `cd` into the project directory  
 3. Run with `npm start`  
+
+## Some useful articles
+Interact react and express: https://daveceddia.com/create-react-app-express-backend/ 
+
+Express router: https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
