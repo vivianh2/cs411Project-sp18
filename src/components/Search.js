@@ -1,54 +1,122 @@
-import React from 'react';
-import classNames from 'classnames';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
-import Icon from 'material-ui/Icon';
+import Select from 'react-select';
 
-const styles = theme => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-  margin: {
-    margin: theme.spacing.unit,
-  },
-  textField: {
-    flexBasis: 200,
-  },
-});
+const STATES = require('./states');
 
-class Search extends React.Component {
-  state = {
-    name: ''
-  };
+class Search extends Component {
+	// example from react select
+	constructor(props){
+		super(props);
+    this.state = {
+			country: 'AU',
+			disabled: false,
+			searchable: this.props.searchable,
+			selectValue: 'new-south-wales',
+			clearable: true,
+			rtl: false,
+		};
+    this.clearValue = this.clearValue.bind(this);
+    this.switchCountry = this.switchCountry.bind(this);
+    this.updateValue = this.updateValue.bind(this);
+    this.focusStateSelect = this.focusStateSelect.bind(this);
+    this.toggleCheckbox = this.toggleCheckbox.bind(this);
+	}
 
-  handleChange = prop => event => {
-    this.setState({ [prop]: event.target.value });
-  };
+	clearValue (e) {
+		this.select.setInputValue('');;
+	}
 
-  render() {
-    const { classes } = this.props;
+	switchCountry (e) {
+		var newCountry = e.target.value;
+		this.setState({
+			country: newCountry,
+			selectValue: null,
+		});
+	}
 
-    return (
-      <div className={classes.root}>
-        <FormControl fullWidth className={classes.margin}>
-          <Input
-            id="adornment-name"
-            placeholder="CS 125"
-            value={this.state.name}
-            onChange={this.handleChange('name')}
-            startAdornment={<InputAdornment position="start"><Icon>search</Icon></InputAdornment>}
-          />
-        </FormControl>
-      </div>
-    );
-  }
+	updateValue (newValue) {
+		this.setState({
+			selectValue: newValue,
+		});
+	}
+
+	focusStateSelect () {
+		this.refs.stateSelect.focus();
+	}
+
+	toggleCheckbox (e) {
+		let newState = {};
+		newState[e.target.name] = e.target.checked;
+		this.setState(newState);
+	}
+
+	render () {
+		var options = STATES[this.state.country];
+		return (
+			<div className="section">
+				<Select
+					id="state-select"
+					ref={(ref) => { this.select = ref; }}
+					onBlurResetsInput={false}
+					onSelectResetsInput={false}
+					autoFocus
+					options={options}
+					simpleValue
+					clearable={this.state.clearable}
+					name="selected-state"
+					disabled={this.state.disabled}
+					value={this.state.selectValue}
+					onChange={this.updateValue}
+					rtl={this.state.rtl}
+					searchable={this.state.searchable}
+				/>
+				<button style={{ marginTop: '15px' }} type="button" onClick={this.focusStateSelect}>Focus Select</button>
+				<button style={{ marginTop: '15px' }} type="button" onClick={this.clearValue}>Clear Value</button>
+
+				<div className="checkbox-list">
+
+					<label className="checkbox">
+						<input type="checkbox" className="checkbox-control" name="searchable" checked={this.state.searchable} onChange={this.toggleCheckbox}/>
+						<span className="checkbox-label">Searchable</span>
+					</label>
+					<label className="checkbox">
+						<input type="checkbox" className="checkbox-control" name="disabled" checked={this.state.disabled} onChange={this.toggleCheckbox}/>
+						<span className="checkbox-label">Disabled</span>
+					</label>
+					<label className="checkbox">
+						<input type="checkbox" className="checkbox-control" name="clearable" checked={this.state.clearable} onChange={this.toggleCheckbox}/>
+						<span className="checkbox-label">Clearable</span>
+					</label>
+					<label className="checkbox">
+						<input type="checkbox" className="checkbox-control" name="rtl" checked={this.state.rtl} onChange={this.toggleCheckbox}/>
+						<span className="checkbox-label">rtl</span>
+					</label>
+				</div>
+				<div className="checkbox-list">
+					<label className="checkbox">
+						<input type="radio" className="checkbox-control" checked={this.state.country === 'AU'} value="AU" onChange={this.switchCountry}/>
+						<span className="checkbox-label">Australia</span>
+					</label>
+					<label className="checkbox">
+						<input type="radio" className="checkbox-control" checked={this.state.country === 'US'} value="US" onChange={this.switchCountry}/>
+						<span className="checkbox-label">United States</span>
+					</label>
+				</div>
+			</div>
+		);
+	}
 }
 
 Search.propTypes = {
-  classes: PropTypes.object.isRequired,
+	label: PropTypes.string,
+	searchable: PropTypes.bool,
 };
 
-export default withStyles(styles)(Search);
+Search.defaultProps = {
+	label: 'States:',
+	searchable: true
+};
+
+
+export default Search;
