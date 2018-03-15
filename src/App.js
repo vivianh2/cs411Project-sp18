@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+
+import AppBar from './components/AppBar.js'
+import Search from './components/Search.js'
 
 class App extends Component {
   state = {
@@ -25,10 +27,11 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
+        <AppBar />
+        <div id="main">
+          <p>Enter the book name, class name or ISBN to start search.</p>
+          <Search />
+        </div>
         <p className="App-intro">{this.state.response}</p>
       </div>
     );
