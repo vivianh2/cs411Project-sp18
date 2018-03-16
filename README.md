@@ -13,9 +13,4 @@ Please PLEASE do **NOT** fork
 2. `cd` into the project directory  
 3. Run `npm install` to install all the modules and dependencies
 It may take a while
-3. Start the client and the server with `npm start`  
-
-## Some useful articles
-Interact react and express: https://daveceddia.com/create-react-app-express-backend/
-
-Express router: https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
+3. Start the client and the server with `npm test`
