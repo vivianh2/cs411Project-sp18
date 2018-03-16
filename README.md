@@ -13,4 +13,4 @@ Please PLEASE do **NOT** fork
 2. `cd` into the project directory  
 3. Run `npm install` to install all the modules and dependencies
 It may take a while
-3. Start the client and the server with `npm start`  
+3. Start the client and the server with `npm test`
