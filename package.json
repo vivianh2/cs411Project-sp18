@@ -23,7 +23,8 @@
     "server": "nodemon server.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "heroku-prebuild": "export NPM_CONFIG_PRODUCTION=false"
   },
   "proxy": "http://localhost:3001",
   "devDependencies": {
