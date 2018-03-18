@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import AppBar from './components/AppBar';
-import Search from './components/Search';
+import Search from './Search';
 
 class App extends Component {
   state = {
@@ -27,7 +26,6 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <AppBar />
         <div id="main">
           <p>Enter the book name, class name or ISBN to start search.</p>
           <Search searchable/>
