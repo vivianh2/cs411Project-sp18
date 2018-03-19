@@ -91,10 +91,10 @@ class Authentication extends Component {
             >
               Account
             </Button>
-            <MyLogout
+            <Link to='/'><MyLogout
               buttonText="Logout"
               onLogoutSuccess={this.logoutSuccess}
-            ><Link to='/'>Logout</Link></MyLogout>
+            ></MyLogout></Link>
           </div>
         )}
       </div>
