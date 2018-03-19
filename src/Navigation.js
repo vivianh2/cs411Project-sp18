@@ -4,7 +4,6 @@ import { withStyles } from 'material-ui/styles';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
 
 import { Link } from 'react-router-dom';
 
@@ -17,10 +16,6 @@ const styles = {
   flex: {
     flex: 1,
   },
-  menuButton: {
-    marginLeft: -12,
-    marginRight: 20,
-  },
 };
 
 function Navigation(props) {
@@ -32,7 +27,6 @@ function Navigation(props) {
           <Typography variant="title" color="inherit" className={classes.flex}>
             <Link to='/'>Read Me Again</Link>
           </Typography>
-          <Button component={({...props}) => <Link to='/account' {...props} />}>Account</Button>
           <Authentication />
         </Toolbar>
       </AppBar>
