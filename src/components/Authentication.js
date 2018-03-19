@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { GoogleLogin } from "react-google-login";
 import MyLogout from "./MyLogout";
-import { withStyles } from 'material-ui/styles';
 import Button from "material-ui/Button";
 import { Link } from "react-router-dom";
 
@@ -9,27 +8,14 @@ import { Link } from "react-router-dom";
 // 1. login and logout
 // 2. once the user logs in, fetch their data from database, and the user will be redicrected to their profile page when clicking on their name/profile image/etc.
 var pauth = sessionStorage.getItem("auth");
-var pnetId = sessionStorage.getItem("netId");
+var pnetid = sessionStorage.getItem("netid");
 var puserName = sessionStorage.getItem("userName");
-
-const styles = {
-  root: {
-    flexGrow: 1,
-  },
-  flex: {
-    flex: 1,
-  },
-  menuButton: {
-    marginLeft: -12,
-    marginRight: 20,
-  },
-};
 
 class Authentication extends Component {
   state = {
     auth: pauth == null ? 0 : pauth, // Yes or no
-    netId: pnetId == null ? "unknown" : pnetId, // User netId
-    userName: puserName == null ? "unknown" : puserName
+    netid: pnetid == null ? '' : pnetid, // User netid
+    userName: puserName == null ? '' : puserName
   };
 
   constructor(props) {
@@ -40,7 +26,7 @@ class Authentication extends Component {
 
   async storeState() {
     sessionStorage.setItem("auth", this.state.auth);
-    sessionStorage.setItem("netId", this.state.netId);
+    sessionStorage.setItem("netid", this.state.netid);
     sessionStorage.setItem("userName", this.state.userName);
   }
 
@@ -49,10 +35,10 @@ class Authentication extends Component {
     var isStudent = email.endsWith("@illinois.edu");
     if (isStudent) {
       var atIndex = email.indexOf("@");
-      var netId = email.substring(0, atIndex);
+      var netid = email.substring(0, atIndex);
       var userName = GoogleUser.getBasicProfile().getName();
       this.setState({
-        netId: netId,
+        netid: netid,
         userName: userName,
         auth: 1
       });
@@ -64,8 +50,8 @@ class Authentication extends Component {
 
   async logoutSuccess() {
     this.setState({
-      netId: "unknow",
-      userName: "unknow",
+      netid: '',
+      userName: '',
       auth: 0
     });
     this.storeState();
@@ -93,14 +79,22 @@ class Authentication extends Component {
         ) : (
           <div>
             <Button
-              component={({ ...props }) => <Link to="/account" {...props} />}
+              component={({ ...props }) => (
+                <Link
+                  to={{
+                    pathname: "/account",
+                    state: { netid: this.state.netid, username: this.state.userName }
+                  }}
+                  {...props}
+                />
+              )}
             >
               Account
             </Button>
             <MyLogout
               buttonText="Logout"
               onLogoutSuccess={this.logoutSuccess}
-            />
+            ><Link to='/'>Logout</Link></MyLogout>
           </div>
         )}
       </div>
@@ -108,4 +102,4 @@ class Authentication extends Component {
   }
 }
 
-export default  withStyles(styles)(Authentication);
+export default Authentication;

@@ -13,7 +13,7 @@ app.get('/api/hello', (req, res) => {
 
 app.get('/api/account', (req, res) => {
   console.log(req.query.id);
-  res.send({ rating: 5 });
+  res.send({ rating: 4 });
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
