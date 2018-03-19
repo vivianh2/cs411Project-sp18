@@ -18,13 +18,6 @@ import {
 
 
 
-var arr = [{
-  name: "CS255"
-}, {
-  name: "CS233"
-}]
-
-
 class App extends Component {
   //the input is an array of bookname
   ret = arr.map((book, index) => {
