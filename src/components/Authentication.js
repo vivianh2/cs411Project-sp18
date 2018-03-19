@@ -1,30 +1,43 @@
 import React, { Component } from 'react';
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
+import MyLogout from './MyLogout'
 
 // this component should handle
 // 1. login and logout
 // 2. once the user logs in, fetch their data from database, and the user will be redicrected to their profile page when clicking on their name/profile image/etc.
+var pstatus = sessionStorage.getItem('status');
+var pprompt = sessionStorage.getItem('prompt');
+var pnetId = sessionStorage.getItem('netId');
+var puserName = sessionStorage.getItem('userName');
 
 class Authentication extends Component {
+
   state = {
-    status: 0, // Yes or no
-    prompt: 'Google Login', // What to show on log bar
-    netId: 'unknown', // User netId
-    userName: 'unknown'
+      status: pstatus == null ? 0:pstatus, // Yes or no
+      prompt: pprompt == null ? 'Google Login':pprompt,//'Google Login', // What to show on log bar
+      netId: pnetId == null ? 'unknown':pnetId, // User netId
+      userName: puserName == null ? 'unknown':puserName
   };
 
   constructor(){
     super();
     this.isLoggedIn = this.isLoggedIn.bind(this);
     this.loginResponse = this.loginResponse.bind(this);
-    this.logoutResponse = this.logoutResponse.bind(this);
+    this.logoutSuccess = this.logoutSuccess.bind(this);
   }
 
   isLoggedIn(){
     return this.state.status;
   }
 
-  loginResponse(GoogleUser) {
+  async storeState(){
+    sessionStorage.setItem('status', this.state.status);
+    sessionStorage.setItem('prompt', this.state.prompt);
+    sessionStorage.setItem('netId', this.state.netId);
+    sessionStorage.setItem('userName', this.state.userName);
+  }
+
+  async loginResponse(GoogleUser) {
       var email = GoogleUser.getBasicProfile().getEmail();
       var isStudent = email.endsWith('@illinois.edu')
       if(isStudent){
@@ -38,21 +51,23 @@ class Authentication extends Component {
               status: 1
             }
           );
+          this.storeState();
       }else{
           alert("Please use UIUC email~");
       }
   };
 
-  logoutResponse(GoogleUser) {
+  async logoutSuccess() {
     this.setState(
-      {
-        status: 0,
-        prompt: 'Google Login',
-        netId: 'unknown',
-        userName: 'unknown'
+      { prompt: 'Google Login',
+        netId: 'unknow',
+        userName: 'unknow',
+        status: 0
       }
     );
+    this.storeState();
     alert("Logged out! We'll miss you~");
+    sessionStorage.clear();
   };
 
   render() {
@@ -63,12 +78,11 @@ class Authentication extends Component {
           clientId="609372741285-p2k1ujp7bdbc5l05oc47102uvoc40qpb.apps.googleusercontent.com"
           buttonText={this.state.prompt}
           onSuccess={this.loginResponse}
-          onFailure={this.loginResponse}
         />
         :
-        <GoogleLogout
+        <MyLogout
           buttonText={this.state.prompt}
-          onLogoutSuccess={this.logoutResponse}
+          onLogoutSuccess={this.logoutSuccess}
         />
       }
       </div>
