@@ -11,4 +11,9 @@ app.get('/api/hello', (req, res) => {
   res.send({ express: 'Hello From Express' });
 });
 
+app.get('/api/account', (req, res) => {
+  console.log(req.query.id);
+  res.send({ rating: 5 });
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));
