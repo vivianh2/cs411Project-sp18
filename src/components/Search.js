@@ -1,14 +1,24 @@
-import React, { Component } from 'react';
+import React, {
+	Component
+} from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
+import ItemList from './Search';
 
 const STATES = require('./states');
+const oneSource = [{
+	name: "CS255",
+	price: "$59"
+}, {
+	name: "CS233",
+	price: "$39"
+}]
 
 class Search extends Component {
 	// example from react select
-	constructor(props){
+	constructor(props) {
 		super(props);
-    this.state = {
+		this.state = {
 			country: 'AU',
 			disabled: false,
 			searchable: this.props.searchable,
@@ -16,18 +26,18 @@ class Search extends Component {
 			clearable: true,
 			rtl: false,
 		};
-    this.clearValue = this.clearValue.bind(this);
-    this.switchCountry = this.switchCountry.bind(this);
-    this.updateValue = this.updateValue.bind(this);
-    this.focusStateSelect = this.focusStateSelect.bind(this);
-    this.toggleCheckbox = this.toggleCheckbox.bind(this);
+		this.clearValue = this.clearValue.bind(this);
+		this.switchCountry = this.switchCountry.bind(this);
+		this.updateValue = this.updateValue.bind(this);
+		this.focusStateSelect = this.focusStateSelect.bind(this);
+		this.toggleCheckbox = this.toggleCheckbox.bind(this);
 	}
 
-	clearValue (e) {
+	clearValue(e) {
 		this.select.setInputValue('');;
 	}
 
-	switchCountry (e) {
+	switchCountry(e) {
 		var newCountry = e.target.value;
 		this.setState({
 			country: newCountry,
@@ -35,24 +45,25 @@ class Search extends Component {
 		});
 	}
 
-	updateValue (newValue) {
+	updateValue(newValue) {
 		this.setState({
 			selectValue: newValue,
 		});
 	}
 
-	focusStateSelect () {
+	focusStateSelect() {
 		this.refs.stateSelect.focus();
 	}
 
-	toggleCheckbox (e) {
+	toggleCheckbox(e) {
 		let newState = {};
 		newState[e.target.name] = e.target.checked;
 		this.setState(newState);
 	}
 
-	render () {
+	render() {
 		var options = STATES[this.state.country];
+		var source = oneSource;
 		return (
 			<div className="section">
 				<Select
@@ -73,6 +84,9 @@ class Search extends Component {
 				/>
 				<button style={{ marginTop: '15px' }} type="button" onClick={this.focusStateSelect}>Focus Select</button>
 				<button style={{ marginTop: '15px' }} type="button" onClick={this.clearValue}>Clear Value</button>
+				
+				<ItemList arr={source}/>
+
 
 				<div className="checkbox-list">
 
