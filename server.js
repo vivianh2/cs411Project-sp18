@@ -77,16 +77,19 @@ app.get('/api/search', (req, res) => {
     posts: [
       [
         {
+          tid: 1,
           condition: "Good",
           price: "$29.99",
           seller: "Ahri"
         },
         {
+          tid: 2,
           condition: "Good",
           price: "$28.99",
           seller: "Bard"
         },
         {
+          tid: 3,
           condition: "Like New",
           price: "$6.99",
           seller: "Caitlyn"
@@ -94,11 +97,13 @@ app.get('/api/search', (req, res) => {
       ],
       [
         {
+          tid: 4,
           condition: "Unacceptable",
           price: "$0.99",
           seller: "Darius"
         },
         {
+          tid: 5,
           condition: "Used",
           price: "$9.99",
           seller: "Ekko"
@@ -125,5 +130,24 @@ app.get('/api/history', (req, res) => {
     ]
   })
 });
+
+app.get('/api/transaction', (req, res) => {
+  console.log(req.query.id);
+  res.send({
+      condition: "Good",
+      price: "$29.99",
+      seller: "Ahri",
+      img: "https://books.google.com/books/content?id=gaEuAAAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72YDhrQcmNKLbAuYRLmMyfjWL54PKfgzCz9yno2qpuQ3BBnd1RMg_FHVUrTwSKqOfNAUbANY86rhhzzoNPwV5CLzVRfsOO1dxemmA6JvwApRWA-vAYr6ilKpuEf9JKtPfTKnteF",
+      contact: "wechat: ahri",
+  })
+});
+
+app.get('/api/book', (req, res) => {
+  console.log(req.query.isbn);
+  res.send({
+    title: "Database Systems: the Complete Book",
+    author: "Hector Garcia-Molina, Jeffrey D. Ullman, Jennifer Widom",
+  })
+})
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
