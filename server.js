@@ -57,4 +57,56 @@ app.get('/api/suggestions', (req, res) => {
   })
 });
 
+app.get('/api/search', (req, res) => {
+  console.log(req.query.q);
+  res.send({
+    books: [
+      {
+        title: "Database Systems: The Complete Book",
+        isbn: "9780133002010",
+      },
+      {
+        title: "Angels and Demons",
+        isbn: "9780593063743",
+      },
+      {
+        title: "Da Vinci code",
+        isbn: "9786028811842",
+      }
+    ],
+    posts: [
+      [
+        {
+          condition: "Good",
+          price: "$29.99",
+          seller: "Ahri"
+        },
+        {
+          condition: "Good",
+          price: "$28.99",
+          seller: "Bard"
+        },
+        {
+          condition: "Like New",
+          price: "$6.99",
+          seller: "Caitlyn"
+        }
+      ],
+      [
+        {
+          condition: "Unacceptable",
+          price: "$0.99",
+          seller: "Darius"
+        },
+        {
+          condition: "Used",
+          price: "$9.99",
+          seller: "Ekko"
+        }
+      ],
+      []
+    ]
+  });
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));

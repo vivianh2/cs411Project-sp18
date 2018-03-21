@@ -6,6 +6,8 @@ import TextField from 'material-ui/TextField';
 import Paper from 'material-ui/Paper';
 import { MenuItem } from 'material-ui/Menu';
 
+import { Redirect } from 'react-router-dom';
+
 let suggestions = [];
 
 function renderInput(inputProps) {
@@ -93,6 +95,10 @@ const styles = theme => ({
 });
 
 class Search extends Component {
+	state = {
+    redirect: false,
+		query: ''
+  }
 
 	componentDidMount() {
 		this.getSuggestions()
@@ -102,7 +108,7 @@ class Search extends Component {
 			.catch(err => console.log(err));
 	}
 
-	getSuggestions = async netid => {
+	getSuggestions = async () => {
 		const response = await fetch("/api/suggestions");
 		const body = await response.json();
 
@@ -111,8 +117,19 @@ class Search extends Component {
 	};
 
 	handleChange = (selectedItem, downshiftState) => {
-    console.log(selectedItem);
+    this.setState({
+			redirect: true,
+			query: selectedItem
+		});
+  }
 
+	renderRedirect = () => {
+    if (this.state.redirect) {
+      return <Redirect to={{
+							  pathname: '/results',
+							  state: { query: this.state.query }
+							}}/>
+    }
   }
 
 	render(){
@@ -147,6 +164,7 @@ class Search extends Component {
 	          </div>
 	        )}
 	      </Downshift>
+				{this.renderRedirect()}
 	    </div>
 	  );
 	}
