@@ -18,6 +18,9 @@ const theme = createMuiTheme({
   palette: {
     primary: blue,
   },
+  typography: {
+    htmlFontSize: 10,
+  },
 });
 
 ReactDOM.render((
