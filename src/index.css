@@ -4,10 +4,7 @@ body {
   font-family: sans-serif;
 }
 
-a {
+a, a:hover, a:focus, a:active, a:visited {
   color: white;
-}
-
-a:hover {
-  color: white;
+  text-decoration: none;
 }

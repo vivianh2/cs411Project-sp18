@@ -78,7 +78,7 @@ class Authentication extends Component {
           />
         ) : (
           <div>
-            <Button
+            <Button color='inherit'
               component={({ ...props }) => (
                 <Link
                   to={{

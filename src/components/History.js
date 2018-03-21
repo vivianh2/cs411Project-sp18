@@ -2,10 +2,8 @@ import React, { Component } from "react";
 
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
-import List from 'material-ui/List';
+import List, { ListItem, ListItemText } from 'material-ui/List';
 import Typography from 'material-ui/Typography';
-
-import Item from './Item';
 
 const styles = theme => ({
   root: {
@@ -13,50 +11,46 @@ const styles = theme => ({
     backgroundColor: theme.palette.background,
   },
   type: {
-    margin: '2% 5%',
+    margin: '1% 2%',
   }
 });
 
-class Results extends Component {
+class History extends Component {
   state = {
-    query: this.props.location.state.query,
-    books: [],
-    posts: [],
+    history: []
   }
 
   componentDidMount() {
-    this.search(this.state.query)
+    console.log(this.props.netid);
+    this.getHistory(this.props.netid)
       .then(res =>
         this.setState({
-          books: res.books,
-          posts: res.posts
+          history: res.history
         })
       )
       .catch(err => console.log(err));
   }
 
-  search = async query => {
-    const response = await fetch("/api/search?q=" + query);
+  getHistory = async (netid) => {
+    const response = await fetch("/api/history?id=" + netid);
     const body = await response.json();
 
     if (response.status !== 200) throw Error(body.message);
     return body;
   };
 
-  handleClick = () => {
-    this.setState({ open: !this.state.open });
-  };
-
   render(){
     const { classes } = this.props;
     return (
       <div className={classes.root}>
-        <Typography className={classes.type} variant="headline" color="inherit">
-          Search Results
+        <Typography className={classes.type} variant="subheading" color="inherit">
+          History
         </Typography>
         <List>
-          {this.state.books.map((book, i) =>
-            <Item book={book} posts={this.state.posts[i]} key={book.isbn}/>
+          {this.state.history.map((item, i) =>
+            <ListItem key={i}>
+              <ListItemText inset primary={item.title} />
+            </ListItem>
           )}
         </List>
       </div>
@@ -64,8 +58,8 @@ class Results extends Component {
   }
 }
 
-Results.propTypes = {
+History.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Results);
+export default withStyles(styles)(History);

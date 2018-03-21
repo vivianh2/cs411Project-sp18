@@ -109,4 +109,21 @@ app.get('/api/search', (req, res) => {
   });
 });
 
+app.get('/api/history', (req, res) => {
+  console.log(req.query.id);
+  res.send({
+    history: [
+      {
+        title: "Database Systems: The Complete Book",
+      },
+      {
+        title: "Angels and Demons",
+      },
+      {
+        title: "Da Vinci code",
+      }
+    ]
+  })
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));

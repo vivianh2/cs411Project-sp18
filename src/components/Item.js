@@ -7,15 +7,16 @@ import Collapse from 'material-ui/transitions/Collapse';
 import ExpandLess from 'material-ui-icons/ExpandLess';
 import ExpandMore from 'material-ui-icons/ExpandMore';
 import Button from 'material-ui/Button';
+import Grid from 'material-ui/Grid';
 
 const styles = theme => ({
   root: {
     width: '90%',
-    margin: '1% 5%',
+    margin: '0 5%',
     backgroundColor: theme.palette.background,
   },
   nested: {
-    paddingLeft: theme.spacing.unit * 4,
+    paddingLeft: '5%',
   },
   button: {
     margin: theme.spacing.unit,
@@ -37,7 +38,14 @@ class Item extends Component {
     if (this.props.posts.length > 0){
       posts = this.props.posts.map((post, i) =>
         <ListItem button className={classes.nested} key={i}>
-          <ListItemText inset primary={post.price} secondary={post.condition} />
+          <Grid container>
+            <Grid item xs={3}>
+              <ListItemText inset primary={post.price} secondary={post.condition} />
+            </Grid>
+            <Grid item>
+              <ListItemText inset primary={post.seller}/>
+            </Grid>
+          </Grid>
           <ListItemSecondaryAction>
             <Button variant="raised" color="primary" className={classes.button}>
               Buy
