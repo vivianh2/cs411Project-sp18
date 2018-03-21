@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
 import Ratings from './Ratings';
+import History from './History'
 
 class Account extends Component {
   state = {
@@ -30,11 +31,12 @@ class Account extends Component {
 
   render() {
     return (
-      <Grid container spacing={12} justify="flex-start" alignItems="center">
-        <Typography variant="display2" align='left' color="inherit"  style={{ margin: "1% 2%" }}>
+      <Grid container justify="flex-start" alignItems="center">
+        <Typography variant="headline" align='left' color="inherit"  style={{ margin: "1% 2%" }}>
           {this.state.username}
         </Typography>
         <Ratings rating={this.state.rating} />
+        <History netid={this.state.netid} />
       </Grid>
     );
   }

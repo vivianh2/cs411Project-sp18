@@ -1,136 +1,177 @@
-import React, {
-	Component
-} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Select from 'react-select';
-import ItemList from './Search';
+import Downshift from 'downshift';
+import { withStyles } from 'material-ui/styles';
+import TextField from 'material-ui/TextField';
+import Paper from 'material-ui/Paper';
+import { MenuItem } from 'material-ui/Menu';
 
-const STATES = require('./states');
-const oneSource = [{
-	name: "CS255",
-	price: "$59"
-}, {
-	name: "CS233",
-	price: "$39"
-}]
+import { Redirect } from 'react-router-dom';
+
+let suggestions = [];
+
+function renderInput(inputProps) {
+  const { InputProps, classes, ref, ...other } = inputProps;
+  return (
+    <TextField
+      InputProps={{
+        inputRef: ref,
+        classes: {
+          root: classes.inputRoot,
+        },
+        ...InputProps,
+      }}
+      {...other}
+    />
+  );
+}
+
+function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, selectedItem }) {
+  const isHighlighted = highlightedIndex === index;
+  const isSelected = (selectedItem || '').indexOf(suggestion.label) > -1;
+
+  return (
+    <MenuItem
+      {...itemProps}
+      key={suggestion.label}
+      selected={isHighlighted}
+      component="div"
+      style={{
+        fontWeight: isSelected ? 500 : 400,
+      }}
+    >
+      {suggestion.label}
+    </MenuItem>
+  );
+}
+renderSuggestion.propTypes = {
+  highlightedIndex: PropTypes.number,
+  index: PropTypes.number,
+  itemProps: PropTypes.object,
+  selectedItem: PropTypes.string,
+  suggestion: PropTypes.shape({ label: PropTypes.string }).isRequired,
+};
+
+function getSuggestions(inputValue) {
+  let count = 0;
+
+  return suggestions.filter(suggestion => {
+    const keep =
+      (!inputValue || suggestion.label.toLowerCase().indexOf(inputValue.toLowerCase()) !== -1) &&
+      count < 5;
+
+    if (keep) {
+      count += 1;
+    }
+
+    return keep;
+  });
+}
+
+const styles = theme => ({
+  root: {
+    flexGrow: 1,
+    height: theme.spacing.unit,
+  },
+  container: {
+    flexGrow: 1,
+    position: 'relative',
+  },
+  paper: {
+    position: 'absolute',
+    zIndex: 1,
+    marginTop: theme.spacing.unit,
+    left: 0,
+    right: 0,
+  },
+  inputRoot: {
+    flexWrap: 'wrap',
+  },
+	button: {
+		height: theme.spacing.unit,
+		width: theme.spacing.unit,
+		margin: "0 2%",
+	}
+});
 
 class Search extends Component {
-	// example from react select
-	constructor(props) {
-		super(props);
-		this.state = {
-			country: 'AU',
-			disabled: false,
-			searchable: this.props.searchable,
-			selectValue: 'new-south-wales',
-			clearable: true,
-			rtl: false,
-		};
-		this.clearValue = this.clearValue.bind(this);
-		this.switchCountry = this.switchCountry.bind(this);
-		this.updateValue = this.updateValue.bind(this);
-		this.focusStateSelect = this.focusStateSelect.bind(this);
-		this.toggleCheckbox = this.toggleCheckbox.bind(this);
+	state = {
+    redirect: false,
+		query: ''
+  }
+
+	componentDidMount() {
+		this.getSuggestions()
+			.then(res =>
+				suggestions = res.suggestions
+			)
+			.catch(err => console.log(err));
 	}
 
-	clearValue(e) {
-		this.select.setInputValue('');;
-	}
+	getSuggestions = async () => {
+		const response = await fetch("/api/suggestions");
+		const body = await response.json();
 
-	switchCountry(e) {
-		var newCountry = e.target.value;
-		this.setState({
-			country: newCountry,
-			selectValue: null,
+		if (response.status !== 200) throw Error(body.message);
+		return body;
+	};
+
+	handleChange = (selectedItem, downshiftState) => {
+    this.setState({
+			redirect: true,
+			query: selectedItem
 		});
-	}
+  }
 
-	updateValue(newValue) {
-		this.setState({
-			selectValue: newValue,
-		});
-	}
+	renderRedirect = () => {
+    if (this.state.redirect) {
+      return <Redirect to={{
+							  pathname: '/results',
+							  state: { query: this.state.query }
+							}}/>
+    }
+  }
 
-	focusStateSelect() {
-		this.refs.stateSelect.focus();
-	}
+	render(){
 
-	toggleCheckbox(e) {
-		let newState = {};
-		newState[e.target.name] = e.target.checked;
-		this.setState(newState);
-	}
-
-	render() {
-		var options = STATES[this.state.country];
-		var source = oneSource;
+	  const { classes } = this.props;
 		return (
-			<div className="section">
-				<Select
-					id="state-select"
-					ref={(ref) => { this.select = ref; }}
-					onBlurResetsInput={false}
-					onSelectResetsInput={false}
-					autoFocus
-					options={options}
-					simpleValue
-					clearable={this.state.clearable}
-					name="selected-state"
-					disabled={this.state.disabled}
-					value={this.state.selectValue}
-					onChange={this.updateValue}
-					rtl={this.state.rtl}
-					searchable={this.state.searchable}
-				/>
-				<button style={{ marginTop: '15px' }} type="button" onClick={this.focusStateSelect}>Focus Select</button>
-				<button style={{ marginTop: '15px' }} type="button" onClick={this.clearValue}>Clear Value</button>
-				
-				<ItemList arr={source}/>
-
-
-				<div className="checkbox-list">
-
-					<label className="checkbox">
-						<input type="checkbox" className="checkbox-control" name="searchable" checked={this.state.searchable} onChange={this.toggleCheckbox}/>
-						<span className="checkbox-label">Searchable</span>
-					</label>
-					<label className="checkbox">
-						<input type="checkbox" className="checkbox-control" name="disabled" checked={this.state.disabled} onChange={this.toggleCheckbox}/>
-						<span className="checkbox-label">Disabled</span>
-					</label>
-					<label className="checkbox">
-						<input type="checkbox" className="checkbox-control" name="clearable" checked={this.state.clearable} onChange={this.toggleCheckbox}/>
-						<span className="checkbox-label">Clearable</span>
-					</label>
-					<label className="checkbox">
-						<input type="checkbox" className="checkbox-control" name="rtl" checked={this.state.rtl} onChange={this.toggleCheckbox}/>
-						<span className="checkbox-label">rtl</span>
-					</label>
-				</div>
-				<div className="checkbox-list">
-					<label className="checkbox">
-						<input type="radio" className="checkbox-control" checked={this.state.country === 'AU'} value="AU" onChange={this.switchCountry}/>
-						<span className="checkbox-label">Australia</span>
-					</label>
-					<label className="checkbox">
-						<input type="radio" className="checkbox-control" checked={this.state.country === 'US'} value="US" onChange={this.switchCountry}/>
-						<span className="checkbox-label">United States</span>
-					</label>
-				</div>
-			</div>
-		);
+	    <div className={classes.root}>
+				<Downshift onChange={this.handleChange}>
+	        {({ getInputProps, getItemProps, isOpen, inputValue, selectedItem, highlightedIndex }) => (
+	          <div className={classes.container}>
+	            {renderInput({
+	              fullWidth: true,
+	              classes,
+	              InputProps: getInputProps({
+	                placeholder: 'Search a country (start with a)',
+	                id: 'integration-downshift-simple',
+	              }),
+	            })}
+	            {isOpen ? (
+	              <Paper className={classes.paper} square>
+	                {getSuggestions(inputValue).map((suggestion, index) =>
+	                  renderSuggestion({
+	                    suggestion,
+	                    index,
+	                    itemProps: getItemProps({ item: suggestion.label }),
+	                    highlightedIndex,
+	                    selectedItem,
+	                  }),
+	                )}
+	              </Paper>
+	            ) : null}
+	          </div>
+	        )}
+	      </Downshift>
+				{this.renderRedirect()}
+	    </div>
+	  );
 	}
 }
 
 Search.propTypes = {
-	label: PropTypes.string,
-	searchable: PropTypes.bool,
+  classes: PropTypes.object.isRequired,
 };
 
-Search.defaultProps = {
-	label: 'States:',
-	searchable: true
-};
-
-
-export default Search;
+export default withStyles(styles)(Search);

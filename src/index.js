@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import Navigation from './Navigation';
 import App from './components/App';
 import Account from './components/Account'
+import Results from './components/Results'
 
 import CssBaseline from 'material-ui/CssBaseline';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
@@ -16,6 +17,9 @@ import blue from 'material-ui/colors/blue';
 const theme = createMuiTheme({
   palette: {
     primary: blue,
+  },
+  typography: {
+    htmlFontSize: 10,
   },
 });
 
@@ -27,6 +31,7 @@ ReactDOM.render((
         <Navigation />
         <Route exact path="/" component={App}/>
         <Route path="/account" component={Account}/>
+        <Route path="/results" component={Results}/>
       </MuiThemeProvider>
     </div>
   </Router>
