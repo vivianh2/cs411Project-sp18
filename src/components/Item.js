@@ -47,6 +47,9 @@ const styles = theme => ({
   },
   contact: {
     paddingLeft: theme.spacing.unit * 2,
+  },
+  divider: {
+    margin: '5% 0',
   }
 });
 
@@ -146,7 +149,7 @@ class Detail extends Component {
                       {this.state.author} <br/>
                       ISBN: {this.props.isbn}
                     </Typography>
-                    <Divider/>
+                    <Divider className={classes.divider}/>
                     <Typography variant="body1">
                       Price: {this.state.price} <br/>
                       Seller: {this.state.seller} <br/>
@@ -205,8 +208,6 @@ class Item extends Component {
     );
   }
 }
-//
-
 
 Item.propTypes = {
   classes: PropTypes.object.isRequired,
