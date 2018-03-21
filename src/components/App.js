@@ -28,7 +28,7 @@ class App extends Component {
       <div className="App">
         <div id="main">
           <p>Enter the book name, class name or ISBN to start search.</p>
-          <Search searchable/>
+          <Search/>
         </div>
         <p className="App-intro">{this.state.response}</p>
       </div>
