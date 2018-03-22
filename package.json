@@ -11,6 +11,8 @@
     "material-ui": "^1.0.0-beta.37",
     "material-ui-icons": "^1.0.0-beta.36",
     "material-ui-image": "^3.0.0-pre.6",
+    "pg": "^7.4.1",
+    "pg-query": "^0.11.0",
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",
     "react-dom": "^16.2.0",

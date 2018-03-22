@@ -1,6 +1,7 @@
 const express = require('express');
-
+const Client = require('pg')
 const app = express();
+
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded({ extended: true })); // to support URL-encoded bodies
 
@@ -22,8 +23,24 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.get('/api/account', (req, res) => {
-  console.log(req.query.id);
-  res.send({ rating: 4 });
+  /*
+  Connection info string:
+   "dbname=d7ci54n4h4tp1i host=ec2-54-163-246-193.compute-1.amazonaws.com port=5432 user=qajckcslbdizfn password=2c9e98f6f2b14a3399916c7e436ad4563d18b5b764e261a14d85fb340357c4c2 sslmode=require"
+   Connection URL:
+   postgres://qajckcslbdizfn:2c9e98f6f2b14a3399916c7e436ad4563d18b5b764e261a14d85fb340357c4c2@ec2-54-163-246-193.compute-1.amazonaws.com:5432/d7ci54n4h4tp1i
+  */
+
+  console.log(req.query.id)
+  const client = new Client({
+    //connectionString: 'dbname=d7ci54n4h4tp1i host=ec2-54-163-246-193.compute-1.amazonaws.com port=5432 user=qajckcslbdizfn password=2c9e98f6f2b14a3399916c7e436ad4563d18b5b764e261a14d85fb340357c4c2 sslmode=require',
+    connectionString: "dbname=d7ci54n4h4tp1i host=ec2-54-163-246-193.compute-1.amazonaws.com port=5432 user=qajckcslbdizfn password=2c9e98f6f2b14a3399916c7e436ad4563d18b5b764e261a14d85fb340357c4c2 sslmode=require",
+    ssl: true
+  });
+
+  client.connect();
+  var ans = client.query("SELECT rating FROM uiuc.user WHERE netid = ?", req.query.id);
+  client.end();
+  res.send({ rating: ans });
 });
 
 app.get('/api/suggestions', (req, res) => {
