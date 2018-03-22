@@ -30,6 +30,22 @@ class Authentication extends Component {
     sessionStorage.setItem("userName", this.state.userName);
   }
 
+  postData(url, data) {
+    // Default options are marked with *
+    return fetch(url, {
+      body: JSON.stringify(data), // must match 'Content-Type' header
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, same-origin, *omit
+      headers: {
+        'content-type': 'application/json'
+      },
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, cors, *same-origin
+      redirect: 'follow', // *manual, follow, error
+      referrer: 'no-referrer', // *client, no-referrer
+    })
+  }
+
   async loginResponse(GoogleUser) {
     var email = GoogleUser.getBasicProfile().getEmail();
     var isStudent = email.endsWith("@illinois.edu");
@@ -43,6 +59,9 @@ class Authentication extends Component {
         auth: 1
       });
       this.storeState();
+
+      this.postData('/api/login', {netid: netid})
+        .catch(error => console.error(error));
     } else {
       alert("Please use UIUC email~");
     }
@@ -57,6 +76,8 @@ class Authentication extends Component {
     this.storeState();
     alert("Logged out! We'll miss you~");
     sessionStorage.clear();
+    this.postData('/api/logout', {netid: ''})
+      .catch(error => console.error(error));
   }
 
   handleMenu = event => {

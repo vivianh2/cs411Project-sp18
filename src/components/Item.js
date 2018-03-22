@@ -12,6 +12,7 @@ import Typography from 'material-ui/Typography';
 import Modal from 'material-ui/Modal';
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
+import Snackbar from 'material-ui/Snackbar';
 
 const styles = theme => ({
   root: {
@@ -53,56 +54,73 @@ const styles = theme => ({
   }
 });
 
+class Snack extends React.Component {
+  state = {
+    open: false,
+  };
+
+  postData(url, data) {
+    // Default options are marked with *
+    return fetch(url, {
+      body: JSON.stringify(data), // must match 'Content-Type' header
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, same-origin, *omit
+      headers: {
+        'content-type': 'application/json'
+      },
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, cors, *same-origin
+      redirect: 'follow', // *manual, follow, error
+      referrer: 'no-referrer', // *client, no-referrer
+    })
+  }
+
+  handleClick = () => {
+    this.setState({ open: true });
+
+    this.postData('/api/purchase', {tid: this.props.tid})
+      .catch(error => console.error(error));
+  };
+
+  handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    this.setState({ open: false });
+  };
+
+  render() {
+    const { classes } = this.props;
+    return (
+      <div>
+        <Button onClick={this.handleClick}>I've contact the seller and set up a pickup time and location.</Button>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          open={this.state.open}
+          autoHideDuration={6000}
+          onClose={this.handleClose}
+          SnackbarContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">You're all set! <br/> Please come back to your account page and confirm your purchase after you received the item.</span>}
+        />
+      </div>
+    );
+  }
+}
+
+Snack.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+
 class Detail extends Component {
   state = {
     open: false,
-    title: '',
-    author: '',
-    isbn: '',
-    condition: '',
-    seller: '',
-    img: '',
-    contact: '',
-    price: '',
-  };
-
-  componentDidMount() {
-    this.getTransaction(this.props.id)
-      .then(res =>
-        this.setState({
-          condition: res.condition,
-          seller: res.seller,
-          img: res.img,
-          contact: res.contact,
-          price: res.price,
-        })
-      )
-      .catch(err => console.log(err));
-
-    this.getBook(this.props.isbn)
-      .then(res =>
-        this.setState({
-          title: res.title,
-          author: res.author
-        })
-      )
-      .catch(err => console.log(err));
-  }
-
-  getTransaction = async id => {
-    const response = await fetch("/api/transaction?id=" + id);
-    const body = await response.json();
-
-    if (response.status !== 200) throw Error(body.message);
-    return body;
-  };
-
-  getBook = async isbn => {
-    const response = await fetch("/api/book?isbn=" + isbn);
-    const body = await response.json();
-
-    if (response.status !== 200) throw Error(body.message);
-    return body;
   };
 
   handleOpen = () => {
@@ -120,10 +138,10 @@ class Detail extends Component {
           <ListItem button className={classes.nested}>
             <Grid container>
               <Grid item xs={3}>
-                <ListItemText inset primary={this.state.price} secondary={this.state.condition} />
+                <ListItemText inset primary={this.props.post.price} secondary={this.props.post.condition} />
               </Grid>
               <Grid item>
-                <ListItemText inset primary={this.state.seller}/>
+                <ListItemText inset primary={this.props.post.seller}/>
               </Grid>
             </Grid>
             <ListItemSecondaryAction>
@@ -139,26 +157,29 @@ class Detail extends Component {
               <Card className={classes.card}>
                 <CardMedia
                   className={classes.cover}
-                  image={this.state.img}
+                  image={this.props.post.img}
                   title="Live from space album cover"
                 />
                 <div className={classes.details}>
                   <CardContent className={classes.content}>
-                    <Typography variant="headline">{this.state.title}</Typography>
+                    <Typography variant="headline">{this.props.book.title}</Typography>
                     <Typography variant="subheading" color="textSecondary">
-                      {this.state.author} <br/>
-                      ISBN: {this.props.isbn}
+                      {this.props.book.author} <br/>
+                    ISBN: {this.props.book.isbn}
                     </Typography>
                     <Divider className={classes.divider}/>
                     <Typography variant="body1">
-                      Price: {this.state.price} <br/>
-                      Seller: {this.state.seller} <br/>
+                      Price: {this.props.post.price} <br/>
+                    Seller: {this.props.post.seller} <br/>
                       Contact:
                     </Typography>
                     <Typography variant="body1" className={classes.contact}>
-                      {this.state.contact}
+                      {this.props.post.contact}
                     </Typography>
                   </CardContent>
+                  <CardActions>
+                    <Snack classes={classes} tid={this.props.post.tid}/>
+                  </CardActions>
                 </div>
               </Card>
               </Modal>
@@ -173,10 +194,10 @@ Detail.propTypes = {
 };
 
 class Item extends Component {
-  state = { list: false };
+  state = { open: false };
 
   handleClick = () => {
-    this.setState({ list: !this.state.list });
+    this.setState({ open: !this.state.open });
   };
 
   render(){
@@ -185,7 +206,7 @@ class Item extends Component {
     let posts;
     if (this.props.posts.length > 0){
       posts = this.props.posts.map((post, i) =>
-        <Detail id={post.tid} isbn={this.props.book.isbn} key={i} classes={classes}/>
+        <Detail book={this.props.book} post={post} key={i} classes={classes}/>
       )
     } else{
       posts = <ListItem className={classes.nested}>
@@ -197,9 +218,9 @@ class Item extends Component {
       <div className={classes.root}>
         <ListItem button onClick={this.handleClick}>
           <ListItemText primary={this.props.book.title} secondary={this.props.book.isbn}/>
-          {this.state.list ? <ExpandLess /> : <ExpandMore />}
+          {this.state.open ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
-        <Collapse in={this.state.list} timeout="auto" unmountOnExit>
+        <Collapse in={this.state.open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             { posts }
           </List>

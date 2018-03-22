@@ -125,7 +125,7 @@ class Search extends Component {
 
 	renderRedirect = () => {
     if (this.state.redirect) {
-      return <Redirect to={{
+      return <Redirect push to={{
 							  pathname: '/results',
 							  state: { query: this.state.query }
 							}}/>
