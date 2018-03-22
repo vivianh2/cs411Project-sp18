@@ -57,6 +57,7 @@ const styles = theme => ({
 class Snack extends React.Component {
   state = {
     open: false,
+    message: "You're offline"
   };
 
   postData(url, data) {
@@ -79,7 +80,28 @@ class Snack extends React.Component {
     this.setState({ open: true });
 
     this.postData('/api/purchase', {tid: this.props.tid})
-      .catch(error => console.error(error));
+      .then(response => {
+        if (response.ok){
+          this.setState({
+            message: "You're all set! Please come back to your account page and confirm your purchase after you received the item.",
+          });
+        } else if (response.status == 401) {
+          this.setState({
+            message: "Please login first",
+          });
+        } else if (response.status == 555){
+          this.setState({
+            message: "Item sold out, please refresh page :<",
+          });
+        } else if (!response.ok){
+          this.setState({
+            message: "Please report bug with error code " + response.status,
+          });
+        }
+      })
+      .catch(error => {
+        console.error(error)
+      });
   };
 
   handleClose = (event, reason) => {
@@ -106,7 +128,7 @@ class Snack extends React.Component {
           SnackbarContentProps={{
             'aria-describedby': 'message-id',
           }}
-          message={<span id="message-id">You're all set! <br/> Please come back to your account page and confirm your purchase after you received the item.</span>}
+          message={<span id="message-id">{this.state.message}</span>}
         />
       </div>
     );

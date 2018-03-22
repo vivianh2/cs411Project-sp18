@@ -155,9 +155,16 @@ app.get('/api/history', (req, res) => {
 });
 
 app.post('/api/purchase', (req, res) => {
-  console.log(netid);
-  console.log(req.body);
-  res.sendStatus(200);
+  if (netid != null){
+    // update database
+    // if the item is sold, do res.sendStatus(555);
+    console.log(netid);
+    console.log(req.body);
+    res.sendStatus(200);
+  } else{
+    // not authorize
+    res.sendStatus(401);
+  }
 })
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
