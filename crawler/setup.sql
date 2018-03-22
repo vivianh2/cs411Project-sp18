@@ -40,3 +40,4 @@ INSERT INTO uiuc.Book VALUES('9780321964267','Perspectives On Argument');
 INSERT INTO uiuc.User (netid, rating) VALUES('vivianh2', 1),('flyu2', 3), ('chenq2', 5), ('haonan3', 4);
 UPDATE uiuc.Transaction SET sell_time = NULL WHERE tid = 1;
 INSERT INTO uiuc.Dept VALUES('CS', 'Computer Science');
+SELECT * FROM uiuc.dept WHERE code LIKE 'E%';
