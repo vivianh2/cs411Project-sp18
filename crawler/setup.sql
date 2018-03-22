@@ -41,3 +41,5 @@ INSERT INTO uiuc.User (netid, rating) VALUES('vivianh2', 1),('flyu2', 3), ('chen
 UPDATE uiuc.Transaction SET sell_time = NULL WHERE tid = 1;
 INSERT INTO uiuc.Dept VALUES('CS', 'Computer Science');
 SELECT * FROM uiuc.dept WHERE code LIKE 'E%';
+DELETE FROM uiuc.Class WHERE NOT (subject = 'MATH' OR subject = 'CS' OR subject = 'STAT'
+    OR subject = 'RHET' OR subject = 'EALC' OR subject = 'CHEM' OR subject = 'BADM' OR subject = 'PHYS' OR subject = 'HIST');
