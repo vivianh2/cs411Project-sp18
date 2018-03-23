@@ -2,8 +2,7 @@ const express = require('express');
 const { Client } = require('pg')
 const app = express();
 const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: true,
+  connectionString: "postgresql://chenqian:null@localhost:5432/postgres",
 });
 
 client.connect();
@@ -31,13 +30,12 @@ app.post('/api/logout', (req, res) => {
 app.get('/api/account', (req, res) => {
   console.log("Account " + req.query.id);
   const query = {
-    text: 'SELECT Rating FROM uiuc.User WHERE NETID = "$1"',
+    text: 'SELECT Rating FROM uiuc.User WHERE NETID = $1',
     values: [req.query.id],
   }
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    client.end();
     console.log(r.rows[0]);
     res.send({rating: r.rows[0].rating});
   });
@@ -50,7 +48,6 @@ app.get('/api/suggestions', (req, res) => {
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    client.end();
     console.log(r.rows[0].subject);
     res.send({suggestions: r.rows});
   });
