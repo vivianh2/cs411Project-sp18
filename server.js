@@ -1,6 +1,13 @@
 const express = require('express');
-
+const { Client } = require('pg')
 const app = express();
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true,
+});
+
+client.connect();
+
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded({ extended: true })); // to support URL-encoded bodies
 
@@ -22,8 +29,16 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.get('/api/account', (req, res) => {
-  console.log(req.query.id);
-  res.send({ rating: 4 });
+  const query = {
+    text: 'SELECT rating FROM uiuc.user WHERE netid = $1',
+    values: [req.query.id],
+  }
+
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    client.end();
+    res.send({rating: r.rows[0].rating});
+  });
 });
 
 app.get('/api/suggestions', (req, res) => {
