@@ -2,9 +2,9 @@ const express = require('express');
 const { Client } = require('pg')
 const app = express();
 const client = new Client({
-  connectionString: "postgresql://chenqian:null@localhost:5432/postgres",
+  connectionString: process.env.DATABASE_URL,
+  ssl: true,
 });
-
 client.connect();
 
 app.use(express.json());       // to support JSON-encoded bodies
