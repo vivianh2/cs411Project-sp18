@@ -43,7 +43,7 @@ app.get('/api/account', (req, res) => {
 
 app.get('/api/suggestions', (req, res) => {
   const query = {
-    text: 'SELECT Subject FROM uiuc.Class',
+    text: 'SELECT DISTINCT Subject FROM uiuc.Class',
   }
 
   client.query(query, (err, r) => {
