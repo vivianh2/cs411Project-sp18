@@ -85,11 +85,11 @@ class Snack extends React.Component {
           this.setState({
             message: "You're all set! Please come back to your account page and confirm your purchase after you received the item.",
           });
-        } else if (response.status == 401) {
+        } else if (response.status === 401) {
           this.setState({
             message: "Please login first",
           });
-        } else if (response.status == 555){
+        } else if (response.status === 555){
           this.setState({
             message: "Item sold out, please refresh page :<",
           });

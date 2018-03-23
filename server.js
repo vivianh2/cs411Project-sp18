@@ -5,7 +5,6 @@ const client = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: true,
 });
-
 client.connect();
 
 app.use(express.json());       // to support JSON-encoded bodies
@@ -29,61 +28,33 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.get('/api/account', (req, res) => {
+  console.log("Account " + req.query.id);
   const query = {
-    text: 'SELECT rating FROM uiuc.user WHERE netid = $1',
+    text: 'SELECT Rating FROM uiuc.User WHERE NETID = $1',
     values: [req.query.id],
   }
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    client.end();
+    console.log(r.rows[0]);
     res.send({rating: r.rows[0].rating});
   });
 });
 
 app.get('/api/suggestions', (req, res) => {
-  res.send({
-    suggestions: [
-      { label: 'Afghanistan' },
-      { label: 'Aland Islands' },
-      { label: 'Albania' },
-      { label: 'Algeria' },
-      { label: 'American Samoa' },
-      { label: 'Andorra' },
-      { label: 'Angola' },
-      { label: 'Anguilla' },
-      { label: 'Antarctica' },
-      { label: 'Antigua and Barbuda' },
-      { label: 'Argentina' },
-      { label: 'Armenia' },
-      { label: 'Aruba' },
-      { label: 'Australia' },
-      { label: 'Austria' },
-      { label: 'Azerbaijan' },
-      { label: 'Bahamas' },
-      { label: 'Bahrain' },
-      { label: 'Bangladesh' },
-      { label: 'Barbados' },
-      { label: 'Belarus' },
-      { label: 'Belgium' },
-      { label: 'Belize' },
-      { label: 'Benin' },
-      { label: 'Bermuda' },
-      { label: 'Bhutan' },
-      { label: 'Bolivia, Plurinational State of' },
-      { label: 'Bonaire, Sint Eustatius and Saba' },
-      { label: 'Bosnia and Herzegovina' },
-      { label: 'Botswana' },
-      { label: 'Bouvet Island' },
-      { label: 'Brazil' },
-      { label: 'British Indian Ocean Territory' },
-      { label: 'Brunei Darussalam' },
-    ]
-  })
+  const query = {
+    text: 'SELECT DISTINCT Subject FROM uiuc.Class',
+  }
+
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    console.log(r.rows[0].subject);
+    res.send({suggestions: r.rows});
+  });
 });
 
 app.get('/api/search', (req, res) => {
-  console.log(req.query.q);
+  console.log("Search " + req.query.q);
   res.send({
     books: [
       {
@@ -153,7 +124,7 @@ app.get('/api/search', (req, res) => {
 });
 
 app.get('/api/history', (req, res) => {
-  console.log(req.query.id);
+  console.log("History " + req.query.id);
   res.send({
     history: [
       {
@@ -173,8 +144,8 @@ app.post('/api/purchase', (req, res) => {
   if (netid != null){
     // update database
     // if the item is sold, do res.sendStatus(555);
-    console.log(netid);
-    console.log(req.body);
+    console.log("purchase " + netid);
+    console.log("purchase " + req.body);
     res.sendStatus(200);
   } else{
     // not authorize

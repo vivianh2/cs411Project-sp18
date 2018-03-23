@@ -28,19 +28,19 @@ function renderInput(inputProps) {
 
 function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, selectedItem }) {
   const isHighlighted = highlightedIndex === index;
-  const isSelected = (selectedItem || '').indexOf(suggestion.label) > -1;
+  const isSelected = (selectedItem || '').indexOf(suggestion.subject) > -1;
 
   return (
     <MenuItem
       {...itemProps}
-      key={suggestion.label}
+      key={suggestion.subject}
       selected={isHighlighted}
       component="div"
       style={{
         fontWeight: isSelected ? 500 : 400,
       }}
     >
-      {suggestion.label}
+      {suggestion.subject}
     </MenuItem>
   );
 }
@@ -57,7 +57,7 @@ function getSuggestions(inputValue) {
 
   return suggestions.filter(suggestion => {
     const keep =
-      (!inputValue || suggestion.label.toLowerCase().indexOf(inputValue.toLowerCase()) !== -1) &&
+      (!inputValue || suggestion.subject.toLowerCase().indexOf(inputValue.toLowerCase()) !== -1) &&
       count < 5;
 
     if (keep) {
@@ -154,7 +154,7 @@ class Search extends Component {
 	                  renderSuggestion({
 	                    suggestion,
 	                    index,
-	                    itemProps: getItemProps({ item: suggestion.label }),
+	                    itemProps: getItemProps({ item: suggestion.subject }),
 	                    highlightedIndex,
 	                    selectedItem,
 	                  }),
