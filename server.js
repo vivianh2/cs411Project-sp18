@@ -128,13 +128,52 @@ app.get('/api/history', (req, res) => {
   res.send({
     history: [
       {
+        tid: 1,
         title: "Database Systems: The Complete Book",
+        buyer: "Ahri",
+        seller: "Bard",
+        posttime: "timestamp",
+        selltime: "timestamp",
       },
       {
+        tid: 2,
         title: "Angels and Demons",
+        buyer: "Bard",
+        seller: "Caitlyn",
+        posttime: "timestamp",
+        selltime: null,
       },
       {
+        tid: 3,
         title: "Da Vinci code",
+        buyer: "Caitlyn",
+        seller: "Darius",
+        posttime: "timestamp",
+        selltime: "timestamp",
+      },
+      {
+        tid: 4,
+        title: "Da Vinci code",
+        buyer: "Darius",
+        seller: "Ekko",
+        posttime: "timestamp",
+        selltime: "timestamp2",
+      },
+      {
+        tid: 5,
+        title: "Da Vinci code",
+        buyer: "Ekko",
+        seller: "Fiora",
+        posttime: "timestamp",
+        selltime: "timestamp3",
+      },
+      {
+        tid: 6,
+        title: "Da Vinci code",
+        buyer: "Fiora",
+        seller: "Galio",
+        posttime: "timestamp",
+        selltime: null,
       }
     ]
   })
@@ -151,6 +190,14 @@ app.post('/api/purchase', (req, res) => {
     // not authorize
     res.sendStatus(401);
   }
+})
+
+app.post('/api/received', (req, res) => {
+  // update selltime in database
+  // and return the timestamp
+  res.send({
+    selltime: "timestamp",
+  })
 })
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
