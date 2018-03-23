@@ -29,7 +29,7 @@
     "build": "react-scripts build",
     "test": "concurrently \"npm run server\" \"npm run client\"",
     "eject": "react-scripts eject",
-    "heroku-postbuild": "npm install --only=dev --no-shrinkwrap && npm run build"
+    "heroku-postbuild": "npm install && npm run build"
   },
   "proxy": "http://localhost:3001",
   "devDependencies": {
