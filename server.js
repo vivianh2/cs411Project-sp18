@@ -200,4 +200,9 @@ app.post('/api/received', (req, res) => {
   })
 })
 
+app.post('/api/create', (req, res) => {
+  console.log(req.body);
+  res.sendStatus(200);
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));

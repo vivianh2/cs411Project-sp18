@@ -95,7 +95,7 @@ class Snack extends React.Component {
           });
         } else if (!response.ok){
           this.setState({
-            message: "Please report bug with error code " + response.status,
+            message: response.status + " " + response.statusText,
           });
         }
       })
