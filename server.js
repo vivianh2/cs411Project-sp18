@@ -113,14 +113,29 @@ app.get('/api/history', (req, res) => {
 });
 
 app.post('/api/purchase', (req, res) => {
-  if (netid != null){
+  var tid = req.body.tid;
+  if (tid != null){
     // update database
     // if the item is sold, do res.sendStatus(555);
+
+    console.log("purchase " + tid);
     console.log("purchase " + netid);
     console.log("purchase " + req.body);
+
+    client.query('SELECT buyerid FROM uiuc.transaction WHERE tid = $1', [tid], (err, r) => {
+         if(r != null) {
+          res.sendStatus(555);
+         }else{
+          client.query('UPDATE uiuc.transaction SET buyerid = $1 WHERE tid = $2',[netid, tid], (err, r) => {
+            console.log("purchase done");
+          })
+         }
+    });
+
     res.sendStatus(200);
   } else{
     // not authorize
+    console.log("purchase " + tid);
     res.sendStatus(401);
   }
 })
@@ -128,9 +143,19 @@ app.post('/api/purchase', (req, res) => {
 app.post('/api/received', (req, res) => {
   // update selltime in database
   // and return the timestamp
-  res.send({
-    selltime: "timestamp",
-  })
+  var tid = req.body.tid;
+  var time = new Date().getTime();
+
+  client.query('UPDATE uiuc.transaction SET sell_time = $1 WHERE tid = $2',[time, tid], (err, r) => {
+    //done();
+    if (err) {
+      throw err;
+    } else{
+      console.log("update timestamp done");
+      res.send({
+      selltime: time,
+    })
+    }
 })
 
 app.post('/api/create', (req, res) => {
