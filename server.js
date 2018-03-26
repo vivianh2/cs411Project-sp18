@@ -178,7 +178,6 @@ app.post("/api/create", (req, res) => {
     var isbn = req.body.isbn;
     var condition = req.body.condition;
     var price = req.body.price;
-    var netid = req.body.netid;
 
     client.query(
         "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, post_time) VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP);",
