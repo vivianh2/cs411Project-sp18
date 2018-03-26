@@ -181,7 +181,7 @@ class History extends Component {
         if (response.ok) {
           response.json().then(result => {
             let history = this.state.history;
-            history[id].selltime = result.selltime;
+            history[id].sell_time = result.sell_time;
             this.setState({
               history: history
             });
