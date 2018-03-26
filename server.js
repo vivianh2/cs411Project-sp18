@@ -56,8 +56,8 @@ app.get('/api/suggestions', (req, res) => {
 app.get('/api/search', (req, res) => {
   console.log("Search " + req.query.q);
   const query = {
-    text: 'SELECT TID, Condition, Price, ISBN'
-          'FROM uiuc.Transaction'
+    text: 'SELECT TID, Condition, Price, ISBN'+
+          'FROM uiuc.Transaction'+
           'WHERE NETID = $1',
     values: [req.query.q],
   }
@@ -66,10 +66,11 @@ app.get('/api/search', (req, res) => {
     if (err) throw err;
     console.log(r.rows[0]);
     res.send({
-      books: r.rows[0].rating,
-      posts:
+      books: r.rows[0].rating
+      // posts:
     });
   });
+});
   // dummy data
   // res.send({
   //   books: [
@@ -137,63 +138,77 @@ app.get('/api/search', (req, res) => {
   //     []
   //   ]
   // });
-});
 
 app.get('/api/history', (req, res) => {
   console.log("History " + req.query.id);
-  res.send({
-    history: [
-      {
-        tid: 1,
-        title: "Database Systems: The Complete Book",
-        buyer: "Ahri",
-        seller: "Bard",
-        posttime: "timestamp",
-        selltime: "timestamp",
-      },
-      {
-        tid: 2,
-        title: "Angels and Demons",
-        buyer: "Bard",
-        seller: "Caitlyn",
-        posttime: "timestamp",
-        selltime: null,
-      },
-      {
-        tid: 3,
-        title: "Da Vinci code",
-        buyer: "Caitlyn",
-        seller: "Darius",
-        posttime: "timestamp",
-        selltime: "timestamp",
-      },
-      {
-        tid: 4,
-        title: "Da Vinci code",
-        buyer: "Darius",
-        seller: "Ekko",
-        posttime: "timestamp",
-        selltime: "timestamp2",
-      },
-      {
-        tid: 5,
-        title: "Da Vinci code",
-        buyer: "Ekko",
-        seller: "Fiora",
-        posttime: "timestamp",
-        selltime: "timestamp3",
-      },
-      {
-        tid: 6,
-        title: "Da Vinci code",
-        buyer: "Fiora",
-        seller: "Galio",
-        posttime: "timestamp",
-        selltime: null,
-      }
-    ]
-  })
+  const query = {
+      text: 'SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time'+
+            'FROM uiuc.transaction t, uiuc.book b, uiuc.user u'+
+            'WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid',
+    values: [req.query.id],
+  }
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    console.log(r.rows[0]);
+    res.send({history: r.rows});
+  });
 });
+
+// app.get('/api/history', (req, res) => {
+//   console.log("History " + req.query.id);
+//   res.send({
+//     history: [
+//       {
+//         tid: 1,
+//         title: "Database Systems: The Complete Book",
+//         buyer: "Ahri",
+//         seller: "Bard",
+//         posttime: "timestamp",
+//         selltime: "timestamp",
+//       },
+//       {
+//         tid: 2,
+//         title: "Angels and Demons",
+//         buyer: "Bard",
+//         seller: "Caitlyn",
+//         posttime: "timestamp",
+//         selltime: null,
+//       },
+//       {
+//         tid: 3,
+//         title: "Da Vinci code",
+//         buyer: "Caitlyn",
+//         seller: "Darius",
+//         posttime: "timestamp",
+//         selltime: "timestamp",
+//       },
+//       {
+//         tid: 4,
+//         title: "Da Vinci code",
+//         buyer: "Darius",
+//         seller: "Ekko",
+//         posttime: "timestamp",
+//         selltime: "timestamp2",
+//       },
+//       {
+//         tid: 5,
+//         title: "Da Vinci code",
+//         buyer: "Ekko",
+//         seller: "Fiora",
+//         posttime: "timestamp",
+//         selltime: "timestamp3",
+//       },
+//       {
+//         tid: 6,
+//         title: "Da Vinci code",
+//         buyer: "Fiora",
+//         seller: "Galio",
+//         posttime: "timestamp",
+//         selltime: null,
+//       }
+//     ]
+//   })
+// });
 
 app.post('/api/purchase', (req, res) => {
   if (netid != null){
