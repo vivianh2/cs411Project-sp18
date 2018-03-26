@@ -188,7 +188,7 @@ class Detail extends Component {
                   <CardContent className={classes.content}>
                     <Typography variant="headline">{this.props.book.title}</Typography>
                     <Typography variant="subheading" color="textSecondary">
-                      {this.props.book.authors.join(', ')} <br/>
+                      {this.props.book.authors && this.props.book.authors.join(', ')} <br/>
                     ISBN: {this.props.book.isbn}
                     </Typography>
                     <Divider className={classes.divider}/>
@@ -225,6 +225,12 @@ class Item extends Component {
 
   componentDidMount () {
     let that = this;
+    this.setState({
+      book: {
+        isbn: this.props.isbn,
+      }
+    });
+    console.log(this.props);
 
     isbn.resolve(this.props.isbn, function (err, book) {
       if (err) {

@@ -144,7 +144,6 @@ class Search extends Component {
 	              fullWidth: true,
 	              classes,
 	              InputProps: getInputProps({
-	                placeholder: 'Search a country (start with a)',
 	                id: 'integration-downshift-simple',
 	              }),
 	            })}
