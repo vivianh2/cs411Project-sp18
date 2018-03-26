@@ -26,11 +26,12 @@ class Results extends Component {
 
   componentDidMount() {
     this.search(this.state.query)
-      .then(res =>
-        this.setState({
-          books: res.books,
-          posts: res.posts
-        })
+      .then(res => {
+          this.setState({
+            books: res.books,
+            posts: res.posts
+          })
+        }
       )
       .catch(err => console.log(err));
   }
@@ -56,7 +57,7 @@ class Results extends Component {
         </Typography>
         <List>
           {this.state.books.map((book, i) =>
-            <Item book={book} posts={this.state.posts[i]} key={book.isbn}/>
+            <Item isbn={book.isbn} posts={this.state.posts[i]} key={book.isbn}/>
           )}
         </List>
       </div>

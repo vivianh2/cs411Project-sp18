@@ -36,107 +36,65 @@ app.get('/api/account', (req, res) => {
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows[0]);
     res.send({rating: r.rows[0].rating});
   });
 });
 
 app.get('/api/suggestions', (req, res) => {
   const query = {
-    text: 'SELECT DISTINCT Subject FROM uiuc.Class',
+    text: 'SELECT DISTINCT concat(Subject, \' \', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT unnest(isbn_list) AS col FROM uiuc.Class',
+    rowMode: 'array',
   }
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows[0].subject);
-    res.send({suggestions: r.rows});
+    res.send({suggestions: [].concat.apply([], r.rows)});
   });
 });
 
 app.get('/api/search', (req, res) => {
   console.log("Search " + req.query.q);
-  const query = {
-    text: 'SELECT TID, Condition, Price, ISBN'
-          'FROM uiuc.Transaction'
-          'WHERE NETID = $1',
-    values: [req.query.q],
+  let query;
+  if (isNaN(req.query.q)){
+    query = {
+      text: 'SELECT TID, Condition, Price, SellerId, ISBN '
+            + 'FROM uiuc.Transaction '
+            + 'WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)',
+      values: req.query.q.split(' '),
+    }
+  } else {
+    query = {
+      text: 'SELECT TID, Condition, Price, SellerId, ISBN '
+            + 'FROM uiuc.Transaction '
+            + 'WHERE ISBN = $1',
+      values: [req.query.q],
+    }
   }
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows[0]);
+    let books = [];
+    let posts = [];
+
+    var groupBy = function(xs, key) {
+      return xs.reduce(function(rv, x) {
+        (rv[x[key]] = rv[x[key]] || []).push(x);
+        return rv;
+      }, {});
+    };
+
+    let isbn_transaction = groupBy(r.rows, 'isbn');
+
+    for (let isbn in isbn_transaction){
+      books.push({isbn: isbn});
+      posts.push(isbn_transaction[isbn]);
+    }
+
     res.send({
-      books: r.rows[0].rating,
-      posts:
+      books: books,
+      posts: posts
     });
   });
-  // dummy data
-  // res.send({
-  //   books: [
-  //     {
-  //       title: "Database Systems: The Complete Book",
-  //       isbn: "9780133002010",
-  //       author: "Hector Garcia-Molina, Jeffrey D. Ullman, Jennifer Widom",
-  //     },
-  //     {
-  //       title: "Angels and Demons",
-  //       isbn: "9780593063743",
-  //       author: "Dan Brown",
-  //     },
-  //     {
-  //       title: "Da Vinci code",
-  //       isbn: "9786028811842",
-  //       author: "Dan Brown",
-  //     }
-  //   ],
-  //   posts: [
-  //     [
-  //       {
-  //         tid: 1,
-  //         condition: "Good",
-  //         price: "$29.99",
-  //         seller: "Ahri",
-  //         img: "https://books.google.com/books/content?id=gaEuAAAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72YDhrQcmNKLbAuYRLmMyfjWL54PKfgzCz9yno2qpuQ3BBnd1RMg_FHVUrTwSKqOfNAUbANY86rhhzzoNPwV5CLzVRfsOO1dxemmA6JvwApRWA-vAYr6ilKpuEf9JKtPfTKnteF",
-  //         contact: "wechat: ahri",
-  //       },
-  //       {
-  //         tid: 2,
-  //         condition: "Good",
-  //         price: "$28.99",
-  //         seller: "Bard",
-  //         img: "https://books.google.com/books/content?id=gaEuAAAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72YDhrQcmNKLbAuYRLmMyfjWL54PKfgzCz9yno2qpuQ3BBnd1RMg_FHVUrTwSKqOfNAUbANY86rhhzzoNPwV5CLzVRfsOO1dxemmA6JvwApRWA-vAYr6ilKpuEf9JKtPfTKnteF",
-  //         contact: "wechat: bard",
-  //       },
-  //       {
-  //         tid: 3,
-  //         condition: "Like New",
-  //         price: "$6.99",
-  //         seller: "Caitlyn",
-  //         img: "https://books.google.com/books/content?id=gaEuAAAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72YDhrQcmNKLbAuYRLmMyfjWL54PKfgzCz9yno2qpuQ3BBnd1RMg_FHVUrTwSKqOfNAUbANY86rhhzzoNPwV5CLzVRfsOO1dxemmA6JvwApRWA-vAYr6ilKpuEf9JKtPfTKnteF",
-  //         contact: "wechat: caitlyn",
-  //       }
-  //     ],
-  //     [
-  //       {
-  //         tid: 4,
-  //         condition: "Unacceptable",
-  //         price: "$0.99",
-  //         seller: "Darius",
-  //         img: "https://books.google.com/books/content?id=gaEuAAAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72YDhrQcmNKLbAuYRLmMyfjWL54PKfgzCz9yno2qpuQ3BBnd1RMg_FHVUrTwSKqOfNAUbANY86rhhzzoNPwV5CLzVRfsOO1dxemmA6JvwApRWA-vAYr6ilKpuEf9JKtPfTKnteF",
-  //         contact: "wechat: darius",
-  //       },
-  //       {
-  //         tid: 5,
-  //         condition: "Used",
-  //         price: "$9.99",
-  //         seller: "Ekko",
-  //         img: "https://books.google.com/books/content?id=gaEuAAAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72YDhrQcmNKLbAuYRLmMyfjWL54PKfgzCz9yno2qpuQ3BBnd1RMg_FHVUrTwSKqOfNAUbANY86rhhzzoNPwV5CLzVRfsOO1dxemmA6JvwApRWA-vAYr6ilKpuEf9JKtPfTKnteF",
-  //         contact: "wechat: ekko",
-  //       }
-  //     ],
-  //     []
-  //   ]
-  // });
 });
 
 app.get('/api/history', (req, res) => {
