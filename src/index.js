@@ -7,8 +7,9 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import Navigation from './Navigation';
 import App from './components/App';
-import Account from './components/Account'
-import Results from './components/Results'
+import Account from './components/Account';
+import Results from './components/Results';
+import Post from './components/Post';
 
 import CssBaseline from 'material-ui/CssBaseline';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
@@ -32,6 +33,7 @@ ReactDOM.render((
         <Route exact path="/" component={App}/>
         <Route path="/account" component={Account}/>
         <Route path="/results" component={Results}/>
+        <Route path="/post" component={Post}/>
       </MuiThemeProvider>
     </div>
   </Router>

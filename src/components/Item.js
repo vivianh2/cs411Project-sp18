@@ -14,6 +14,8 @@ import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
 import Snackbar from 'material-ui/Snackbar';
 
+const isbn = require('node-isbn');
+
 const styles = theme => ({
   root: {
     width: '90%',
@@ -95,7 +97,7 @@ class Snack extends React.Component {
           });
         } else if (!response.ok){
           this.setState({
-            message: "Please report bug with error code " + response.status,
+            message: response.status + " " + response.statusText,
           });
         }
       })
@@ -163,7 +165,7 @@ class Detail extends Component {
                 <ListItemText inset primary={this.props.post.price} secondary={this.props.post.condition} />
               </Grid>
               <Grid item>
-                <ListItemText inset primary={this.props.post.seller}/>
+                <ListItemText inset primary={this.props.post.sellerid}/>
               </Grid>
             </Grid>
             <ListItemSecondaryAction>
@@ -180,19 +182,19 @@ class Detail extends Component {
                 <CardMedia
                   className={classes.cover}
                   image={this.props.post.img}
-                  title="Live from space album cover"
+                  title="Item detail"
                 />
                 <div className={classes.details}>
                   <CardContent className={classes.content}>
                     <Typography variant="headline">{this.props.book.title}</Typography>
                     <Typography variant="subheading" color="textSecondary">
-                      {this.props.book.author} <br/>
+                      {this.props.book.authors && this.props.book.authors.join(', ')} <br/>
                     ISBN: {this.props.book.isbn}
                     </Typography>
                     <Divider className={classes.divider}/>
                     <Typography variant="body1">
                       Price: {this.props.post.price} <br/>
-                    Seller: {this.props.post.seller} <br/>
+                    Seller: {this.props.post.sellerid} <br/>
                       Contact:
                     </Typography>
                     <Typography variant="body1" className={classes.contact}>
@@ -216,7 +218,30 @@ Detail.propTypes = {
 };
 
 class Item extends Component {
-  state = { open: false };
+  state = {
+    open: false,
+    book: {}
+  };
+
+  componentDidMount () {
+    let that = this;
+    this.setState({
+      book: {
+        isbn: this.props.isbn,
+      }
+    });
+    console.log(this.props);
+
+    isbn.resolve(this.props.isbn, function (err, book) {
+      if (err) {
+        console.log('Book not found', err);
+      } else {
+        book.isbn = that.props.isbn;
+        that.setState({ book: book })
+        console.log('Book found %j', book);
+      }
+    });
+  }
 
   handleClick = () => {
     this.setState({ open: !this.state.open });
@@ -228,7 +253,7 @@ class Item extends Component {
     let posts;
     if (this.props.posts.length > 0){
       posts = this.props.posts.map((post, i) =>
-        <Detail book={this.props.book} post={post} key={i} classes={classes}/>
+        <Detail book={this.state.book} post={post} key={i} classes={classes}/>
       )
     } else{
       posts = <ListItem className={classes.nested}>
@@ -239,7 +264,7 @@ class Item extends Component {
     return (
       <div className={classes.root}>
         <ListItem button onClick={this.handleClick}>
-          <ListItemText primary={this.props.book.title} secondary={this.props.book.isbn}/>
+          <ListItemText primary={this.state.book.title} secondary={this.props.isbn}/>
           {this.state.open ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
         <Collapse in={this.state.open} timeout="auto" unmountOnExit>

@@ -26,7 +26,6 @@ class Account extends Component {
     const body = await response.json();
 
     if (response.status !== 200) throw Error(body.message);
-    console.log(body);
     return body;
   };
 

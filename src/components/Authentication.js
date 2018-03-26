@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { GoogleLogin } from "react-google-login";
 import MyLogout from "./MyLogout";
+import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
 import Button from "material-ui/Button";
 import { Link } from "react-router-dom";
 
@@ -10,6 +12,16 @@ import { Link } from "react-router-dom";
 var pauth = sessionStorage.getItem("auth");
 var pnetid = sessionStorage.getItem("netid");
 var puserName = sessionStorage.getItem("userName");
+
+const style = {
+  background: "white",
+  color: "#2196F3"
+};
+
+const styles = theme => ({
+  root: {
+  },
+});
 
 class Authentication extends Component {
   state = {
@@ -89,8 +101,9 @@ class Authentication extends Component {
   };
 
   render() {
+    const { classes } = this.props;
     return (
-      <div className="auth">
+      <div className={classes.root}>
         {!this.state.auth ? (
           <GoogleLogin
             clientId="609372741285-p2k1ujp7bdbc5l05oc47102uvoc40qpb.apps.googleusercontent.com"
@@ -99,6 +112,9 @@ class Authentication extends Component {
           />
         ) : (
           <div>
+            <Button style={style} component={Link} to="/post">
+              Post
+            </Button>
             <Button color='inherit'
               component={({ ...props }) => (
                 <Link
@@ -123,4 +139,8 @@ class Authentication extends Component {
   }
 }
 
-export default Authentication;
+Authentication.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(Authentication);
