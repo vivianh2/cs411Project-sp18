@@ -175,7 +175,24 @@ app.post("/api/received", (req, res) => {
 });
 
 app.post("/api/create", (req, res) => {
-  console.log(req.body);
+    var isbn = req.body.isbn;
+    var condition = req.body.condition;
+    var price = req.body.price;
+
+    client.query(
+        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, post_time) VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP);",
+        [isbn, condition, price, netid],
+        (err, r) => {
+          if (err) {
+            throw err;
+          } else {
+            console.log("Insert post done");
+            res.send({
+              selltime: time
+            });
+          }
+        }
+    );
   res.sendStatus(200);
 });
 
