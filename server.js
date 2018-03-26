@@ -198,7 +198,7 @@ app.post("/api/create", (req, res) => {
 
 app.post("/api/delete", (req, res) => {
   client.query(
-    "DELETE uiuc.transaction WHERE tid=$1",
+    "DELETE FROM uiuc.Transaction WHERE tid=$1",
     [req.body.tid],
     (err, r) => {
       if (err) {
