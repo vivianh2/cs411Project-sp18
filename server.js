@@ -180,8 +180,18 @@ app.post("/api/create", (req, res) => {
 });
 
 app.post("/api/delete", (req, res) => {
-  console.log(req.body);
-  res.sendStatus(200);
+  client.query(
+    "DELETE uiuc.transaction WHERE tid=$1",
+    [req.body.tid],
+    (err, r) => {
+      if (err) {
+        throw err;
+      } else {
+        console.log(req.body.tid + " deleted");
+        res.sendStatus(200);
+      }
+    }
+  );
 })
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
