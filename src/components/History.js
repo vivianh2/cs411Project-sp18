@@ -1,29 +1,29 @@
 import React, { Component } from "react";
 
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import Typography from 'material-ui/Typography';
-import Button from 'material-ui/Button';
+import PropTypes from "prop-types";
+import { withStyles } from "material-ui/styles";
+import Typography from "material-ui/Typography";
+import Button from "material-ui/Button";
 import Table, {
   TableHead,
   TableBody,
   TableCell,
   TableFooter,
   TablePagination,
-  TableRow,
-} from 'material-ui/Table';
-import IconButton from 'material-ui/IconButton';
-import FirstPageIcon from 'material-ui-icons/FirstPage';
-import KeyboardArrowLeft from 'material-ui-icons/KeyboardArrowLeft';
-import KeyboardArrowRight from 'material-ui-icons/KeyboardArrowRight';
-import LastPageIcon from 'material-ui-icons/LastPage';
+  TableRow
+} from "material-ui/Table";
+import IconButton from "material-ui/IconButton";
+import FirstPageIcon from "material-ui-icons/FirstPage";
+import KeyboardArrowLeft from "material-ui-icons/KeyboardArrowLeft";
+import KeyboardArrowRight from "material-ui-icons/KeyboardArrowRight";
+import LastPageIcon from "material-ui-icons/LastPage";
 
 const actionsStyles = theme => ({
   root: {
     flexShrink: 0,
     color: theme.palette.text.secondary,
-    marginLeft: theme.spacing.unit * 2.5,
-  },
+    marginLeft: theme.spacing.unit * 2.5
+  }
 });
 
 class TablePaginationActions extends React.Component {
@@ -42,7 +42,7 @@ class TablePaginationActions extends React.Component {
   handleLastPageButtonClick = event => {
     this.props.onChangePage(
       event,
-      Math.max(0, Math.ceil(this.props.count / this.props.rowsPerPage) - 1),
+      Math.max(0, Math.ceil(this.props.count / this.props.rowsPerPage) - 1)
     );
   };
 
@@ -56,28 +56,36 @@ class TablePaginationActions extends React.Component {
           disabled={page === 0}
           aria-label="First Page"
         >
-          {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
+          {theme.direction === "rtl" ? <LastPageIcon /> : <FirstPageIcon />}
         </IconButton>
         <IconButton
           onClick={this.handleBackButtonClick}
           disabled={page === 0}
           aria-label="Previous Page"
         >
-          {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+          {theme.direction === "rtl" ? (
+            <KeyboardArrowRight />
+          ) : (
+            <KeyboardArrowLeft />
+          )}
         </IconButton>
         <IconButton
           onClick={this.handleNextButtonClick}
           disabled={page >= Math.ceil(count / rowsPerPage) - 1}
           aria-label="Next Page"
         >
-          {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+          {theme.direction === "rtl" ? (
+            <KeyboardArrowLeft />
+          ) : (
+            <KeyboardArrowRight />
+          )}
         </IconButton>
         <IconButton
           onClick={this.handleLastPageButtonClick}
           disabled={page >= Math.ceil(count / rowsPerPage) - 1}
           aria-label="Last Page"
         >
-          {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
+          {theme.direction === "rtl" ? <FirstPageIcon /> : <LastPageIcon />}
         </IconButton>
       </div>
     );
@@ -90,37 +98,37 @@ TablePaginationActions.propTypes = {
   onChangePage: PropTypes.func.isRequired,
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
-  theme: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired
 };
 
-const TablePaginationActionsWrapped = withStyles(actionsStyles, { withTheme: true })(
-  TablePaginationActions,
-);
+const TablePaginationActionsWrapped = withStyles(actionsStyles, {
+  withTheme: true
+})(TablePaginationActions);
 
 const styles = theme => ({
   root: {
-    width: '100%',
-    backgroundColor: theme.palette.background,
+    width: "100%",
+    backgroundColor: theme.palette.background
   },
   type: {
-    margin: '1% 2%',
+    margin: "1% 2%"
   },
   table: {
-    minWidth: 500,
+    minWidth: 500
   },
   tableWrapper: {
-    overflowX: 'auto',
-    width: '95%',
-    margin: '0 2.5%',
-  },
+    overflowX: "auto",
+    width: "95%",
+    margin: "0 2.5%"
+  }
 });
 
 class History extends Component {
   state = {
     history: [],
     page: 0,
-    rowsPerPage: 5,
-  }
+    rowsPerPage: 5
+  };
 
   componentDidMount() {
     this.getHistory(this.props.netid)
@@ -135,7 +143,7 @@ class History extends Component {
       .catch(err => console.log(err));
   }
 
-  getHistory = async (netid) => {
+  getHistory = async netid => {
     const response = await fetch("/api/history?id=" + netid);
     const body = await response.json();
 
@@ -155,41 +163,60 @@ class History extends Component {
     // Default options are marked with *
     return fetch(url, {
       body: JSON.stringify(data), // must match 'Content-Type' header
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, same-origin, *omit
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, same-origin, *omit
       headers: {
-        'content-type': 'application/json'
+        "content-type": "application/json"
       },
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, cors, *same-origin
-      redirect: 'follow', // *manual, follow, error
-      referrer: 'no-referrer', // *client, no-referrer
-    })
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, cors, *same-origin
+      redirect: "follow", // *manual, follow, error
+      referrer: "no-referrer" // *client, no-referrer
+    });
   }
 
   received = id => {
-    this.postData('/api/received', {tid: this.state.history[id].tid})
-      .then(response => {
-        if (response.ok){
-          response.json()
-            .then((result) => {
-              let history = this.state.history
-              history[id].selltime = result.selltime;
-              this.setState({
-                history: history,
-              });
+    this.postData("/api/received", { tid: this.state.history[id].tid }).then(
+      response => {
+        if (response.ok) {
+          response.json().then(result => {
+            let history = this.state.history;
+            history[id].selltime = result.selltime;
+            this.setState({
+              history: history
             });
+          });
         }
-      })
+      }
+    );
   };
 
-  render(){
+  received = id => {
+    this.postData("/api/delete", { tid: this.state.history[id].tid }).then(
+      response => {
+        if (response.ok) {
+          let history = this.state.history;
+          history.splice(id, 1);
+          this.setState({
+            history: history
+          });
+        }
+      }
+    );
+  };
+
+  render() {
     const { classes } = this.props;
     const { history, rowsPerPage, page } = this.state;
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, history.length - page * rowsPerPage);
+    const emptyRows =
+      rowsPerPage - Math.min(rowsPerPage, history.length - page * rowsPerPage);
     return (
       <div className={classes.root}>
-        <Typography className={classes.type} variant="subheading" color="inherit">
+        <Typography
+          className={classes.type}
+          variant="subheading"
+          color="inherit"
+        >
           History
         </Typography>
         <div className={classes.tableWrapper}>
@@ -204,25 +231,43 @@ class History extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {history.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(n => {
-                return (
-                  <TableRow key={n.id}>
-                    <TableCell>{n.title}</TableCell>
-                    <TableCell>{n.buyer}</TableCell>
-                    <TableCell>{n.seller}</TableCell>
-                    <TableCell>{n.posttime}</TableCell>
-                    <TableCell>
-                      { n.selltime === null ?
-                        <Button variant="raised" color="primary" className={classes.button} onClick={() => this.received(n.id)}>
-                          I've received the item
-                        </Button>
-                        :
-                        n.selltime
-                      }
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {history
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map(n => {
+                  return (
+                    <TableRow key={n.id}>
+                      <TableCell>{n.name}</TableCell>
+                      <TableCell>
+                        {n.buyerid ? n.buyerid : "Not sold yet"}
+                      </TableCell>
+                      <TableCell>{n.sellerid}</TableCell>
+                      <TableCell>{n.post_time}</TableCell>
+                      <TableCell>
+                        {n.sell_time ? (
+                          n.sell_time
+                        ) : n.buyerid ? (
+                          <Button
+                            variant="raised"
+                            color="primary"
+                            className={classes.button}
+                            onClick={() => this.received(n.id)}
+                          >
+                            I've received the item
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="raised"
+                            color="primary"
+                            className={classes.button}
+                            onClick={() => this.received(n.id)}
+                          >
+                            Delete this post
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 48 * emptyRows }}>
                   <TableCell colSpan={6} />
@@ -250,7 +295,7 @@ class History extends Component {
 }
 
 History.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(History);
