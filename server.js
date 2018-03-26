@@ -187,9 +187,6 @@ app.post("/api/create", (req, res) => {
             throw err;
           } else {
             console.log("Insert post done");
-            res.send({
-              selltime: time
-            });
           }
         }
     );
