@@ -31,10 +31,10 @@ const currencies = [
     value: 'USD',
     label: '$',
   },
-  {
-    value: 'CNY',
-    label: '¥',
-  },
+  // {
+  //   value: 'CNY',
+  //   label: '¥',
+  // },
 ];
 
 class Post extends React.Component {
@@ -50,7 +50,7 @@ class Post extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  post_data(url, data) {
+  postData(url, data) {
     // Default options are marked with *
     return fetch(url, {
       body: JSON.stringify(data), // must match 'Content-Type' header
@@ -73,15 +73,13 @@ class Post extends React.Component {
   };
 
   handleSubmit(event) {
-    console.log(this.fileInput.files[0]);
     console.log(this.state);
-    this.post_data('/api/create', {
+    this.postData('/api/create', {
       isbn: this.state.isbn,
       condition: this.state.condition,
       price: this.state.price,
       contact: this.state.contact,
-      currency: this.state.currency,
-      img: this.fileInput.files[0],
+      currency: this.state.currency
     })
       .then(response => {
         if (response.ok){
@@ -108,7 +106,6 @@ class Post extends React.Component {
           margin="normal"
           fullWidth
         />
-        <br />
         <TextField
           id="select-condition"
           required
