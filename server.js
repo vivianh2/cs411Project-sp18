@@ -3,7 +3,7 @@ const { Client } = require("pg");
 const app = express();
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: true,
+  // ssl: true,
 });
 client.connect();
 
@@ -59,7 +59,7 @@ app.get("/api/search", (req, res) => {
   if (isNaN(req.query.q)) {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN " +
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url" +
         "FROM uiuc.Transaction " +
         "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
       values: req.query.q.split(" ")
@@ -67,7 +67,7 @@ app.get("/api/search", (req, res) => {
   } else {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN " +
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url" +
         "FROM uiuc.Transaction " +
         "WHERE ISBN = $1",
       values: [req.query.q]
@@ -178,10 +178,11 @@ app.post("/api/create", (req, res) => {
     var isbn = req.body.isbn;
     var condition = req.body.condition;
     var price = req.body.price;
+    var img_url = req.body.img_url;
 
     client.query(
-        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, post_time) VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP);",
-        [isbn, condition, price, netid],
+        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, post_time, img_url) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
+        [isbn, condition, price, netid, img_url],
         (err, r) => {
           if (err) {
             throw err;
