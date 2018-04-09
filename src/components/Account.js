@@ -5,6 +5,7 @@ import Grid from "material-ui/Grid";
 import { MenuList, MenuItem } from "material-ui/Menu";
 import { ListItemIcon, ListItemText } from "material-ui/List";
 import AccountIcon from "material-ui-icons/AccountCircle";
+import HistoryIcon from "material-ui-icons/History";
 
 import Ratings from "./Ratings";
 import History from "./History";
@@ -76,7 +77,7 @@ class Account extends Component {
             </MenuItem>
             <MenuItem className={classes.menuItem} value="history" onClick={() => this.menuClick("history")}>
               <ListItemIcon className={classes.icon}>
-                <AccountIcon />
+                <HistoryIcon />
               </ListItemIcon>
               <ListItemText
                 classes={{ primary: classes.primary }}

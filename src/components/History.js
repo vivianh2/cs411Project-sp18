@@ -214,7 +214,7 @@ class History extends Component {
       <div className={classes.root}>
         <Typography
           className={classes.type}
-          variant="subheading"
+          variant="headline"
           color="inherit"
         >
           History
