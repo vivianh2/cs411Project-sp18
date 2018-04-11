@@ -80,23 +80,30 @@ class Post extends React.Component {
   };
 
   handleSubmit(event) {
-    // check required fields
-    this.postData('/api/create', {
-      isbn: this.state.isbn,
-      condition: this.state.condition,
-      price: this.state.price,
-      contact: this.state.contact,
-      currency: this.state.currency,
-      img_url: this.state.uploadedFileCloudinaryUrl
-    })
-      .then(response => {
-        if (response.ok){
-          alert("Your post has been received.");
-        } else {
-          alert(response.status + " " + response.statusText);
-        }
-      })
     event.preventDefault();
+    // check required fields
+    if(this.state.isbn === "" || this.state.condition === "" || this.state.price === ""
+    || this.state.contact === "" || this.state.currency === "" || this.state.uploadedFileCloudinaryUrl === ""){
+      alert("Please fill all the entries");
+      return;
+    }else{
+      this.postData('/api/create', {
+        isbn: this.state.isbn,
+        condition: this.state.condition,
+        price: this.state.price,
+        contact: this.state.contact,
+        currency: this.state.currency,
+        img_url: this.state.uploadedFileCloudinaryUrl
+      })
+        .then(response => {
+          if (response.ok){
+            alert("Your post has been received.");
+          } else {
+            alert(response.status + " " + response.statusText);
+          }
+        })
+    }
+
   }
 
   onImageDrop = (files) => {
@@ -111,8 +118,7 @@ class Post extends React.Component {
       if (err) {
         console.error(err);
       }
-console.log(response.body)
-      console.log(this)
+
       if (response.body.secure_url !== '') {
         this.setState({
           uploadedFileCloudinaryUrl: response.body.secure_url   // 我感觉是这里出了问题?????

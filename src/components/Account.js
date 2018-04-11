@@ -3,7 +3,6 @@ import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
 import Ratings from './Ratings';
 import History from './History'
-import ImageUpload from "./Image"
 
 class Account extends Component {
   state = {
