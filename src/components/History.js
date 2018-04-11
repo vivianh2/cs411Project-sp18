@@ -14,6 +14,8 @@ import Table, {
 } from "material-ui/Table";
 import IconButton from "material-ui/IconButton";
 import FirstPageIcon from "material-ui-icons/FirstPage";
+import EditIcon from "material-ui-icons/Edit";
+import DeleteIcon from "material-ui-icons/Delete";
 import KeyboardArrowLeft from "material-ui-icons/KeyboardArrowLeft";
 import KeyboardArrowRight from "material-ui-icons/KeyboardArrowRight";
 import LastPageIcon from "material-ui-icons/LastPage";
@@ -109,9 +111,6 @@ const styles = theme => ({
   root: {
     width: "100%",
     backgroundColor: theme.palette.background
-  },
-  type: {
-    margin: "1% 2%"
   },
   table: {
     minWidth: 500
@@ -213,7 +212,6 @@ class History extends Component {
     return (
       <div className={classes.root}>
         <Typography
-          className={classes.type}
           variant="headline"
           color="inherit"
         >
@@ -228,68 +226,53 @@ class History extends Component {
                 <TableCell>Seller</TableCell>
                 <TableCell>Post time</TableCell>
                 <TableCell>Sell time</TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {history
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map(n => {
-                  return (
-                    <TableRow key={n.id}>
-                      <TableCell>{n.name}</TableCell>
-                      <TableCell>
-                        {n.buyerid ? n.buyerid : "Not sold yet"}
-                      </TableCell>
-                      <TableCell>{n.sellerid}</TableCell>
-                      <TableCell>{n.post_time}</TableCell>
-                      <TableCell>
-                        {n.sell_time ? (
-                          n.sell_time
-                        ) : n.buyerid ? (
-                          <Button
-                            variant="raised"
-                            color="primary"
-                            className={classes.button}
-                            onClick={() => this.received(n.id)}
-                          >
-                            I've received the item
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="raised"
-                            color="primary"
-                            className={classes.button}
-                            onClick={() => this.received(n.id)}
-                          >
-                            Delete this post
-                          </Button>
-                        )}
-                      </TableCell>
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map(n => {
+                    return (
+                      <TableRow key={n.id}>
+                        <TableCell>{n.name}</TableCell>
+                        <TableCell>{n.buyerid}</TableCell>
+                        <TableCell>{n.sellerid}</TableCell>
+                        <TableCell>{n.post_time}</TableCell>
+                        <TableCell>{n.sell_time}</TableCell>
+                        <TableCell>
+                          <IconButton color="primary" className={classes.button} aria-label="Edit">
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton color="primary" className={classes.button} aria-label="Delete">
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 48 * emptyRows }}>
+                      <TableCell colSpan={6} />
                     </TableRow>
-                  );
-                })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 48 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  colSpan={3}
-                  count={history.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onChangePage={this.handleChangePage}
-                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                  Actions={TablePaginationActionsWrapped}
-                />
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </div>
-      </div>
+                  )}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      colSpan={3}
+                      count={history.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onChangePage={this.handleChangePage}
+                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                      Actions={TablePaginationActionsWrapped}
+                    />
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </div>
+          </div>
     );
   }
 }
