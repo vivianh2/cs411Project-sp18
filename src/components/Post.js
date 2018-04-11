@@ -80,6 +80,7 @@ class Post extends React.Component {
   };
 
   handleSubmit(event) {
+    // check required fields
     this.postData('/api/create', {
       isbn: this.state.isbn,
       condition: this.state.condition,
@@ -98,7 +99,7 @@ class Post extends React.Component {
     event.preventDefault();
   }
 
-  onImageDrop(files) {
+  onImageDrop = (files) => {
     this.setState({
       uploadedFile: files[0]
     });
@@ -110,7 +111,8 @@ class Post extends React.Component {
       if (err) {
         console.error(err);
       }
-
+console.log(response.body)
+      console.log(this)
       if (response.body.secure_url !== '') {
         this.setState({
           uploadedFileCloudinaryUrl: response.body.secure_url   // 我感觉是这里出了问题?????

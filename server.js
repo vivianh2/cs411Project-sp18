@@ -175,6 +175,7 @@ app.post("/api/received", (req, res) => {
 });
 
 app.post("/api/create", (req, res) => {
+  console.log(req.body);
     var isbn = req.body.isbn;
     var condition = req.body.condition;
     var price = req.body.price;
