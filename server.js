@@ -181,8 +181,11 @@ app.post("/api/create", (req, res) => {
     var price = req.body.price;
     var img_url = req.body.img_url;
 
+    console.log("hehe")
+    console.log(img_url)
+
     client.query(
-        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, post_time, img_url) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
+        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, img_url, post_time) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
         [isbn, condition, price, netid, img_url],
         (err, r) => {
           if (err) {
