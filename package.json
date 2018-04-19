@@ -13,6 +13,8 @@
     "material-ui-icons": "^1.0.0-beta.36",
     "material-ui-image": "^3.0.0-pre.6",
     "node-isbn": "^1.3.0",
+    "nodemailer": "^4.0.1",
+    "nodemailer-smtp-transport": "^2.7.4",
     "pg": "^7.4.1",
     "pg-query": "^0.11.0",
     "react": "^16.2.0",
@@ -33,7 +35,7 @@
     "eject": "react-scripts eject",
     "heroku-postbuild": "npm install && npm run build"
   },
-  "proxy": "http://localhost:3001",
+  "proxy": "http://localhost:3002",
   "devDependencies": {
     "concurrently": "^3.5.1",
     "nodemon": "^1.17.1"
