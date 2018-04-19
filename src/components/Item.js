@@ -157,7 +157,7 @@ class Detail extends Component {
 
   render() {
     const { classes } = this.props;
-    console.log(this.props.post.img)
+    console.log(this.props.img)
     return (
           <ListItem button className={classes.nested}>
             <Grid container>
@@ -230,7 +230,6 @@ class Item extends Component {
         isbn: this.props.isbn,
       }
     });
-    console.log(this.props);
 
     isbn.resolve(this.props.isbn, function (err, book) {
       if (err) {
@@ -252,8 +251,9 @@ class Item extends Component {
 
     let posts;
     if (this.props.posts.length > 0){
+      console.log(this.props)
       posts = this.props.posts.map((post, i) =>
-        <Detail book={this.state.book} post={post} key={i} classes={classes} img={this.props.img}/>
+        <Detail book={this.state.book} post={post} key={i} classes={classes} img={post.img_url}/>
       )
     } else{
       posts = <ListItem className={classes.nested}>

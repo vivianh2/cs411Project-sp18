@@ -43,14 +43,16 @@ app.get("/api/account", (req, res) => {
 app.get("/api/suggestions", (req, res) => {
   const query = {
     text:
-      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT unnest(isbn_list) AS col FROM uiuc.Class",
+      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction",
     rowMode: "array"
   };
+
 
   client.query(query, (err, r) => {
     if (err) throw err;
     res.send({ suggestions: [].concat.apply([], r.rows) });
   });
+
 });
 
 app.get("/api/search", (req, res) => {
@@ -59,7 +61,7 @@ app.get("/api/search", (req, res) => {
   if (isNaN(req.query.q)) {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url" +
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
         "FROM uiuc.Transaction " +
         "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
       values: req.query.q.split(" ")
@@ -67,15 +69,18 @@ app.get("/api/search", (req, res) => {
   } else {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url" +
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
         "FROM uiuc.Transaction " +
         "WHERE ISBN = $1",
       values: [req.query.q]
     };
   }
 
+
   client.query(query, (err, r) => {
+    console.log(err);
     if (err) throw err;
+
     let books = [];
     let posts = [];
 

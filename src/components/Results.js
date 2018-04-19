@@ -56,7 +56,7 @@ class Results extends Component {
         </Typography>
         <List>
           {this.state.books.map((book, i) =>
-            <Item isbn={book.isbn} posts={this.state.posts[i]} key={book.isbn} img={book.img_url}/>
+            <Item isbn={book.isbn} posts={this.state.posts[i]} key={book.isbn} img={this.state.posts[i].img_url}/>
           )}
         </List>
       </div>
