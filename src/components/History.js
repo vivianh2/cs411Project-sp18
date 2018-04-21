@@ -209,13 +209,10 @@ class History extends Component {
     const { history, rowsPerPage, page } = this.state;
     const emptyRows =
       rowsPerPage - Math.min(rowsPerPage, history.length - page * rowsPerPage);
-    console.log(history)
+    console.log(history);
     return (
       <div className={classes.root}>
-        <Typography
-          variant="headline"
-          color="inherit"
-        >
+        <Typography variant="headline" color="inherit">
           History
         </Typography>
         <div className={classes.tableWrapper}>
@@ -232,48 +229,76 @@ class History extends Component {
             </TableHead>
             <TableBody>
               {history
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map(n => {
-                    return (
-                      <TableRow key={n.id}>
-                        <TableCell>{n.name}</TableCell>
-                        <TableCell>{n.buyerid}</TableCell>
-                        <TableCell>{n.sellerid}</TableCell>
-                        <TableCell>{n.post_time}</TableCell>
-                        <TableCell>{n.sell_time}</TableCell>
-                        <TableCell>
-                          <IconButton color="primary" className={classes.button} aria-label="Edit">
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton color="primary" className={classes.button} aria-label="Delete" disabled={!(n.buyerid === null || n.buyerid === undefined)} onClick={() => this.delete(n.id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 48 * emptyRows }}>
-                      <TableCell colSpan={6} />
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map(n => {
+                  return (
+                    <TableRow key={n.id}>
+                      <TableCell>{n.name}</TableCell>
+                      <TableCell>{n.buyerid}</TableCell>
+                      <TableCell>{n.sellerid}</TableCell>
+                      <TableCell>{n.post_time}</TableCell>
+                      <TableCell>
+                        {(n.sell_time || (n.sellerid === this.props.netid)) ? (
+                          n.sell_time
+                        ) : (
+                          <Button
+                            variant="raised"
+                            color="primary"
+                            className={classes.button}
+                            onClick={() => this.received(n.id)}
+                          >
+                            Item received
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          color="primary"
+                          className={classes.button}
+                          aria-label="Edit"
+                          disabled={
+                            !(n.sellerid === this.props.netid && n.buyerid === null)
+                          }
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color="primary"
+                          className={classes.button}
+                          aria-label="Delete"
+                          disabled={
+                            !(n.buyerid === null || n.buyerid === undefined)
+                          }
+                          onClick={() => this.delete(n.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      colSpan={3}
-                      count={history.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onChangePage={this.handleChangePage}
-                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                      Actions={TablePaginationActionsWrapped}
-                    />
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </div>
-          </div>
+                  );
+                })}
+              {emptyRows > 0 && (
+                <TableRow style={{ height: 48 * emptyRows }}>
+                  <TableCell colSpan={6} />
+                </TableRow>
+              )}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  colSpan={3}
+                  count={history.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onChangePage={this.handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  Actions={TablePaginationActionsWrapped}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </div>
+      </div>
     );
   }
 }

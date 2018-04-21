@@ -155,8 +155,8 @@ app.post("/api/purchase", (req, res) => {
 app.post("/api/received", (req, res) => {
   // update selltime in database
   // and return the timestamp
-  var tid = req.body.tid;
-  var time = new Date().getTime();
+  let tid = req.body.tid;
+  const time = new Date();
 
   client.query(
     "UPDATE uiuc.transaction SET sell_time = $1 WHERE tid = $2",
@@ -167,7 +167,7 @@ app.post("/api/received", (req, res) => {
       } else {
         console.log("update timestamp done");
         res.send({
-          selltime: time
+          sell_time: time
         });
       }
     }
