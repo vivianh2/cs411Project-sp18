@@ -29,7 +29,7 @@ class Results extends Component {
       .then(res =>
         this.setState({
           books: res.books,
-          posts: res.posts
+          posts: res.posts,
         })
       )
       .catch(err => console.log(err));
@@ -56,7 +56,7 @@ class Results extends Component {
         </Typography>
         <List>
           {this.state.books.map((book, i) =>
-            <Item isbn={book.isbn} posts={this.state.posts[i]} key={book.isbn}/>
+            <Item isbn={book.isbn} posts={this.state.posts[i]} key={book.isbn} img={this.state.posts[i].img_url}/>
           )}
         </List>
       </div>

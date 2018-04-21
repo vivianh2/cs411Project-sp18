@@ -37,6 +37,7 @@ class Account extends Component {
         </Typography>
         <Ratings rating={this.state.rating} />
         <History netid={this.state.netid} />
+
       </Grid>
     );
   }

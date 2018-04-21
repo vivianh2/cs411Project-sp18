@@ -43,14 +43,16 @@ app.get("/api/account", (req, res) => {
 app.get("/api/suggestions", (req, res) => {
   const query = {
     text:
-      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT unnest(isbn_list) AS col FROM uiuc.Class",
+      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction",
     rowMode: "array"
   };
+
 
   client.query(query, (err, r) => {
     if (err) throw err;
     res.send({ suggestions: [].concat.apply([], r.rows) });
   });
+
 });
 
 app.get("/api/search", (req, res) => {
@@ -59,7 +61,7 @@ app.get("/api/search", (req, res) => {
   if (isNaN(req.query.q)) {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN " +
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
         "FROM uiuc.Transaction " +
         "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
       values: req.query.q.split(" ")
@@ -67,15 +69,18 @@ app.get("/api/search", (req, res) => {
   } else {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN " +
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
         "FROM uiuc.Transaction " +
         "WHERE ISBN = $1",
       values: [req.query.q]
     };
   }
 
+
   client.query(query, (err, r) => {
+    console.log(err);
     if (err) throw err;
+
     let books = [];
     let posts = [];
 
@@ -175,13 +180,18 @@ app.post("/api/received", (req, res) => {
 });
 
 app.post("/api/create", (req, res) => {
+  console.log(req.body);
     var isbn = req.body.isbn;
     var condition = req.body.condition;
     var price = req.body.price;
+    var img_url = req.body.img_url;
+
+    console.log("hehe")
+    console.log(img_url)
 
     client.query(
-        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, post_time) VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP);",
-        [isbn, condition, price, netid],
+        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, img_url, post_time) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
+        [isbn, condition, price, netid, img_url],
         (err, r) => {
           if (err) {
             throw err;
