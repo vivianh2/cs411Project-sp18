@@ -238,7 +238,7 @@ class History extends Component {
                       <TableCell>{n.sellerid}</TableCell>
                       <TableCell>{n.post_time}</TableCell>
                       <TableCell>
-                        {(n.sell_time || (n.sellerid === this.props.netid)) ? (
+                        {n.sell_time || n.sellerid === this.props.netid ? (
                           n.sell_time
                         ) : (
                           <Button
@@ -257,7 +257,10 @@ class History extends Component {
                           className={classes.button}
                           aria-label="Edit"
                           disabled={
-                            !(n.sellerid === this.props.netid && n.buyerid === null)
+                            !(
+                              n.sellerid === this.props.netid &&
+                              n.buyerid === null
+                            )
                           }
                         >
                           <EditIcon />
