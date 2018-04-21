@@ -190,7 +190,7 @@ class History extends Component {
     );
   };
 
-  received = id => {
+  delete = id => {
     this.postData("/api/delete", { tid: this.state.history[id].tid }).then(
       response => {
         if (response.ok) {
@@ -209,6 +209,7 @@ class History extends Component {
     const { history, rowsPerPage, page } = this.state;
     const emptyRows =
       rowsPerPage - Math.min(rowsPerPage, history.length - page * rowsPerPage);
+    console.log(history)
     return (
       <div className={classes.root}>
         <Typography
@@ -244,7 +245,7 @@ class History extends Component {
                           <IconButton color="primary" className={classes.button} aria-label="Edit">
                             <EditIcon />
                           </IconButton>
-                          <IconButton color="primary" className={classes.button} aria-label="Delete">
+                          <IconButton color="primary" className={classes.button} aria-label="Delete" disabled={!(n.buyerid === null || n.buyerid === undefined)} onClick={() => this.delete(n.id)}>
                             <DeleteIcon />
                           </IconButton>
                         </TableCell>

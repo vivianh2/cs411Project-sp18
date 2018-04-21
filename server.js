@@ -111,7 +111,7 @@ app.get("/api/history", (req, res) => {
   };
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows[0]);
+    console.log(r.rows);
     res.send({ history: r.rows });
   });
 });
