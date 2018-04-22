@@ -6,6 +6,7 @@ import { MenuList, MenuItem } from "material-ui/Menu";
 import { ListItemIcon, ListItemText } from "material-ui/List";
 import AccountIcon from "material-ui-icons/AccountCircle";
 import HistoryIcon from "material-ui-icons/History";
+import ReactEcharts from 'echarts-for-react';
 
 import Ratings from "./Ratings";
 import History from "./History";
@@ -31,8 +32,17 @@ class Account extends Component {
     netid: this.props.location.state.netid,
     username: this.props.location.state.username,
     rating: 0,
+    option: {},
     selectedItem: "account",
   };
+
+  //this.state.option_data
+
+  componentWillUnmount() {
+
+
+  }
+
 
   componentDidMount() {
     this.getAccount(this.state.netid)
@@ -42,12 +52,28 @@ class Account extends Component {
         })
       )
       .catch(err => console.log(err));
+
+      this.getChartData(this.state.netid)
+      .then(res => {
+        this.setState({
+          option: res.option
+        })
+        console.log("normp is: " + this.state.option_data)
+      }
+      ).catch(err => console.log(err));
   }
 
   getAccount = async netid => {
     const response = await fetch("/api/account?id=" + netid);
     const body = await response.json();
 
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
+
+  getChartData = async netid => {
+    const response = await fetch("/api/prices");
+    const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
     return body;
   };
@@ -101,14 +127,22 @@ class Account extends Component {
                   {this.state.username}
                 </Typography>
                 <Ratings rating={this.state.rating} />
+
+                <ReactEcharts
+                  option={this.state.option}
+                  style={{ height: '300px' }}
+                  opts={{ renderer: 'svg' }} // use svg to render the chart.
+                />
+
               </React.Fragment>
             )
           }
           {
-            this.state.selectedItem === "history" && 
-              <History netid={this.state.netid} />
+            this.state.selectedItem === "history" &&
+            <History netid={this.state.netid} />
           }
         </Grid>
+      </Grid>
     );
   }
 }
