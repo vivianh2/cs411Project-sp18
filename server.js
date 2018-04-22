@@ -109,15 +109,9 @@ app.get("/api/history", (req, res) => {
   console.log("History " + req.query.id);
   const query = {
     text:
-<<<<<<< Updated upstream
       "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time, t.price \
        FROM uiuc.transaction t, uiuc.book b, uiuc.user u \
        WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid",
-=======
-      "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time " +
-      "FROM uiuc.transaction t, uiuc.book b " +
-      "WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn",
->>>>>>> Stashed changes
     values: [req.query.id]
   };
   client.query(query, (err, r) => {
