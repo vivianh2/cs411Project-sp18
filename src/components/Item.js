@@ -13,6 +13,7 @@ import Modal from 'material-ui/Modal';
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
 import Snackbar from 'material-ui/Snackbar';
+import Email from 'material-ui-icons/Email';
 
 const isbn = require('node-isbn');
 
@@ -53,7 +54,17 @@ const styles = theme => ({
   },
   divider: {
     margin: '5% 0',
-  }
+  },
+  leftIcon: {
+    marginRight: theme.spacing.unit * 2,
+  },
+  rightIcon: {
+    marginLeft: theme.spacing.unit * 2,
+  },
+  iconSmall: {
+    fontSize: 20,
+    margin: '0 0.3em',
+  },
 });
 
 class Snack extends React.Component {
@@ -230,7 +241,6 @@ class Item extends Component {
         isbn: this.props.isbn,
       }
     });
-    console.log(this.props);
 
     isbn.resolve(this.props.isbn, function (err, book) {
       if (err) {
@@ -269,7 +279,7 @@ class Item extends Component {
     this.postData('/api/email', {isbn: this.state.book.isbn})
     .then(response => {
       if (response.ok){
-        alert("XXXXXXXXX.");
+        alert("Your email has been recorded");
       } else {
         alert(response.status + " " + response.statusText);
       }
@@ -303,8 +313,9 @@ class Item extends Component {
             { posts }
           </List>
         </Collapse>
-        <Button variant="raised" color="primary" onClick={this.handleEmail}>
-          Email Me, when new book.
+        <Button color="primary" onClick={this.handleEmail}>
+          <Email className={classes.leftIcon, classes.iconSmall}/>
+          Email Me when new book get posted
         </Button>
       </div>
     );
