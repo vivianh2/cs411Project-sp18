@@ -136,8 +136,8 @@ app.get("/api/search", (req, res) => {
     let books = [];
     let posts = [];
 
-    var groupBy = function(xs, key) {
-      return xs.reduce(function(rv, x) {
+    var groupBy = function (xs, key) {
+      return xs.reduce(function (rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(x);
         return rv;
       }, {});
@@ -410,5 +410,67 @@ app.post("/api/email", (req, res) => {
   );
   console.log("tid: " + netid);
 });
+
+
+
+app.get("/api/prices", (req, res) => {
+  let normp = [];
+  //let posts = [];
+  let option = {};
+
+  console.log("Checking Price");
+  const query = {
+    text:
+      "SELECT ((price-minPrice) / itv)::NUMERIC normp, post_time FROM \
+      uiuc.transaction \
+      CROSS JOIN \
+      (select MIN(groupStat.pri) minPrice, ((MAX(groupStat.pri) - MIN(groupStat.pri))::NUMERIC + 0.001) itv, groupStat.isbn from \
+      (SELECT ta.price pri, ta.isbn isbn, ta.post_time from uiuc.transaction AS ta) AS groupStat \
+      GROUP BY groupStat.isbn) AS h WHERE h.isbn=uiuc.transaction.isbn ORDER BY post_time",
+    values: []
+  }
+  client.query(query, (err, r) => {
+
+
+    var groupBy = function (xs, key) {
+
+      if (err) throw err;
+      //console.log(r.rows);
+
+      return xs.reduce(function (rv, x) {
+        (rv[x[key]] = rv[x[key]] || []).push(parseFloat(x));
+        return rv;
+      }, {});
+    };
+
+    let normp_array = groupBy(r.rows, "normp");
+    console.log(Object.keys(normp_array));
+
+    res.send({
+      option : {
+        title:{
+          show:true,
+          text: "Book Index",
+          left: '40%'
+        },
+        xAxis: {
+          type: 'category',
+          data: [],
+          name: "Relative Time",
+          left: '40%'
+        },
+        yAxis: {
+          type: 'value',
+          name: "Relative Price"
+        },
+        series: [{
+          data: Object.keys(normp_array),
+          type: 'line'
+        }]
+      }
+    });
+ }
+)
+})
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
