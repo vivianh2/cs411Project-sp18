@@ -105,10 +105,11 @@ class Account extends Component {
             )
           }
           {
-            this.state.selectedItem === "history" && 
+            this.state.selectedItem === "history" &&
               <History netid={this.state.netid} />
           }
         </Grid>
+      </Grid>
     );
   }
 }

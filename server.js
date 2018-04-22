@@ -1,18 +1,23 @@
 const express = require("express");
 const { Client } = require("pg");
 const app = express();
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: true,
-});
-client.connect();
+let client;
 
 app.use(express.json()); // to support JSON-encoded bodies
 app.use(express.urlencoded({ extended: true })); // to support URL-encoded bodies
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("build"));
+  client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: true,
+  });
+} else{
+  client = new Client({
+    connectionString: process.env.DATABASE_URL,
+  });
 }
+client.connect();
 
 const port = process.env.PORT || 3001;
 
