@@ -52,10 +52,6 @@ class Post extends React.Component {
     uploadedFile: null,
     uploadedFileCloudinaryUrl: ''
   };
-  constructor(props) {
-    super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
 
   postData(url, data) {
     // Default options are marked with *
@@ -79,7 +75,7 @@ class Post extends React.Component {
     });
   };
 
-  handleSubmit(event) {
+  handleSubmit = event => {
     event.preventDefault();
     // check required fields
     if(this.state.isbn === "" || this.state.condition === "" || this.state.price === ""
