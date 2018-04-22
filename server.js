@@ -320,7 +320,7 @@ function sendEmail(req, res) {
   getBookName(req, res, function(bookName) {
     getMailList(req, res, function(mailArray) {
       deleteMailList(req, res, function(delete_) {
-        if (mailArray.length === 0){
+        if (!mailArray || mailArray.length === 0){
           return;
         }
         for (let i = 0; i < mailArray.length - 1; i++) {
