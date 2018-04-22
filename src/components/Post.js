@@ -52,10 +52,6 @@ class Post extends React.Component {
     uploadedFile: null,
     uploadedFileCloudinaryUrl: ''
   };
-  constructor(props) {
-    super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
 
   postData(url, data) {
     // Default options are marked with *
@@ -79,7 +75,7 @@ class Post extends React.Component {
     });
   };
 
-  handleSubmit(event) {
+  handleSubmit = event => {
     event.preventDefault();
     // check required fields
     if(this.state.isbn === "" || this.state.condition === "" || this.state.price === ""
@@ -87,6 +83,7 @@ class Post extends React.Component {
       alert("Please fill all the entries");
       return;
     }else{
+      console.log(this.state);
       this.postData('/api/create', {
         isbn: this.state.isbn,
         condition: this.state.condition,
@@ -218,7 +215,7 @@ class Post extends React.Component {
                 onDrop={this.onImageDrop}
                 multiple={false}
                 accept="image/*">
-                <div>Drop an image or click to select a file to upload.{this.state.uploadedFileCloudinaryUrl}</div>
+                <div>Drop an image or click to select a file to upload.</div>
               </Dropzone>
             </div>
 
@@ -226,7 +223,7 @@ class Post extends React.Component {
               {this.state.uploadedFileCloudinaryUrl === '' ? null :
               <div>
                 <p>{this.state.uploadedFile.name}</p>
-                <img src={this.state.uploadedFileCloudinaryUrl} alt="" />
+                <img src={this.state.uploadedFileCloudinaryUrl} alt="" width={400} height={300} />
               </div>}
             </div>
 

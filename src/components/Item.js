@@ -13,6 +13,7 @@ import Modal from 'material-ui/Modal';
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
 import Snackbar from 'material-ui/Snackbar';
+import Email from 'material-ui-icons/Email';
 
 const isbn = require('node-isbn');
 
@@ -53,94 +54,18 @@ const styles = theme => ({
   },
   divider: {
     margin: '5% 0',
-  }
+  },
+  leftIcon: {
+    marginRight: theme.spacing.unit * 2,
+  },
+  rightIcon: {
+    marginLeft: theme.spacing.unit * 2,
+  },
+  iconSmall: {
+    fontSize: 20,
+    margin: '0 0.3em',
+  },
 });
-
-class Snack extends React.Component {
-  state = {
-    open: false,
-    message: "You're offline"
-  };
-
-  postData(url, data) {
-    // Default options are marked with *
-    return fetch(url, {
-      body: JSON.stringify(data), // must match 'Content-Type' header
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, same-origin, *omit
-      headers: {
-        'content-type': 'application/json'
-      },
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, cors, *same-origin
-      redirect: 'follow', // *manual, follow, error
-      referrer: 'no-referrer', // *client, no-referrer
-    })
-  }
-
-  handleClick = () => {
-    this.setState({ open: true });
-
-    this.postData('/api/purchase', {tid: this.props.tid})
-      .then(response => {
-        if (response.ok){
-          this.setState({
-            message: "You're all set! Please come back to your account page and confirm your purchase after you received the item.",
-          });
-        } else if (response.status === 401) {
-          this.setState({
-            message: "Please login first",
-          });
-        } else if (response.status === 555){
-          this.setState({
-            message: "Item sold out, please refresh page :<",
-          });
-        } else if (!response.ok){
-          this.setState({
-            message: response.status + " " + response.statusText,
-          });
-        }
-      })
-      .catch(error => {
-        console.error(error)
-      });
-  };
-
-  handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    this.setState({ open: false });
-  };
-
-  render() {
-    const { classes } = this.props;
-    return (
-      <div>
-        <Button onClick={this.handleClick}>I've contact the seller and set up a pickup time and location.</Button>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          open={this.state.open}
-          autoHideDuration={6000}
-          onClose={this.handleClose}
-          SnackbarContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-          message={<span id="message-id">{this.state.message}</span>}
-        />
-      </div>
-    );
-  }
-}
-
-Snack.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
 
 class Detail extends Component {
   state = {
@@ -201,9 +126,6 @@ class Detail extends Component {
                       {this.props.post.contact}
                     </Typography>
                   </CardContent>
-                  <CardActions>
-                    <Snack classes={classes} tid={this.props.post.tid}/>
-                  </CardActions>
                 </div>
               </Card>
               </Modal>
@@ -246,6 +168,37 @@ class Item extends Component {
     this.setState({ open: !this.state.open });
   };
 
+  postData(url, data) {
+    // Default options are marked with *
+    return fetch(url, {
+      body: JSON.stringify(data), // must match 'Content-Type' header
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, same-origin, *omit
+      headers: {
+        'content-type': 'application/json'
+      },
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, cors, *same-origin
+      redirect: 'follow', // *manual, follow, error
+      referrer: 'no-referrer', // *client, no-referrer
+    })
+  }
+
+  handleEmail = () => {
+    console.log('isbn: ');
+    console.log(this.state.book.isbn);
+    this.postData('/api/email', {isbn: this.state.book.isbn})
+    .then(response => {
+      if (response.ok){
+        alert("Your email has been recorded");
+      } else {
+        alert(response.status + " " + response.statusText);
+      }
+    }).catch(error => {
+      console.error(error)
+    });
+  }
+
   render(){
     const { classes } = this.props;
 
@@ -272,6 +225,10 @@ class Item extends Component {
             { posts }
           </List>
         </Collapse>
+        <Button color="primary" onClick={this.handleEmail}>
+          <Email className={classes.leftIcon, classes.iconSmall}/>
+          Email Me when new book get posted
+        </Button>
       </div>
     );
   }
