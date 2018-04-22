@@ -52,10 +52,6 @@ class Post extends React.Component {
     uploadedFile: null,
     uploadedFileCloudinaryUrl: ''
   };
-  constructor(props) {
-    super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
 
   postData(url, data) {
     // Default options are marked with *
@@ -79,7 +75,26 @@ class Post extends React.Component {
     });
   };
 
+<<<<<<< Updated upstream
   handleSubmit(event) {
+=======
+  handleSubmit = event => {
+    console.log(this.state);
+    this.postData('/api/create', {
+      isbn: this.state.isbn,
+      condition: this.state.condition,
+      price: this.state.price,
+      contact: this.state.contact,
+      currency: this.state.currency
+    })
+      .then(response => {
+        if (response.ok){
+          alert("Your post has been received.");
+        } else {
+          alert(response.status + " " + response.statusText);
+        }
+      })
+>>>>>>> Stashed changes
     event.preventDefault();
     // check required fields
     if(this.state.isbn === "" || this.state.condition === "" || this.state.price === ""
