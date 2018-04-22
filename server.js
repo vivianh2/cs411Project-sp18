@@ -3,7 +3,7 @@ const { Client } = require("pg");
 const app = express();
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: true,
+  //  ssl: true
 });
 client.connect();
 
@@ -116,7 +116,7 @@ app.get("/api/history", (req, res) => {
   };
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows[0]);
+    console.log(r.rows);
     res.send({ history: r.rows });
   });
 });
@@ -160,8 +160,8 @@ app.post("/api/purchase", (req, res) => {
 app.post("/api/received", (req, res) => {
   // update selltime in database
   // and return the timestamp
-  var tid = req.body.tid;
-  var time = new Date().getTime();
+  let tid = req.body.tid;
+  const time = new Date();
 
   client.query(
     "UPDATE uiuc.transaction SET sell_time = $1 WHERE tid = $2",
@@ -172,7 +172,7 @@ app.post("/api/received", (req, res) => {
       } else {
         console.log("update timestamp done");
         res.send({
-          selltime: time
+          sell_time: time
         });
       }
     }

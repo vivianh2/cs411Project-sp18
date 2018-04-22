@@ -14,6 +14,8 @@ import Table, {
 } from "material-ui/Table";
 import IconButton from "material-ui/IconButton";
 import FirstPageIcon from "material-ui-icons/FirstPage";
+import EditIcon from "material-ui-icons/Edit";
+import DeleteIcon from "material-ui-icons/Delete";
 import KeyboardArrowLeft from "material-ui-icons/KeyboardArrowLeft";
 import KeyboardArrowRight from "material-ui-icons/KeyboardArrowRight";
 import LastPageIcon from "material-ui-icons/LastPage";
@@ -110,9 +112,6 @@ const styles = theme => ({
     width: "100%",
     backgroundColor: theme.palette.background
   },
-  type: {
-    margin: "1% 2%"
-  },
   table: {
     minWidth: 500
   },
@@ -191,7 +190,7 @@ class History extends Component {
     );
   };
 
-  received = id => {
+  delete = id => {
     this.postData("/api/delete", { tid: this.state.history[id].tid }).then(
       response => {
         if (response.ok) {
@@ -210,13 +209,10 @@ class History extends Component {
     const { history, rowsPerPage, page } = this.state;
     const emptyRows =
       rowsPerPage - Math.min(rowsPerPage, history.length - page * rowsPerPage);
+    console.log(history);
     return (
       <div className={classes.root}>
-        <Typography
-          className={classes.type}
-          variant="subheading"
-          color="inherit"
-        >
+        <Typography variant="headline" color="inherit">
           History
         </Typography>
         <div className={classes.tableWrapper}>
@@ -228,6 +224,7 @@ class History extends Component {
                 <TableCell>Seller</TableCell>
                 <TableCell>Post time</TableCell>
                 <TableCell>Sell time</TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -237,23 +234,12 @@ class History extends Component {
                   return (
                     <TableRow key={n.id}>
                       <TableCell>{n.name}</TableCell>
-                      <TableCell>
-                        {n.buyerid ? n.buyerid : "Not sold yet"}
-                      </TableCell>
+                      <TableCell>{n.buyerid}</TableCell>
                       <TableCell>{n.sellerid}</TableCell>
                       <TableCell>{n.post_time}</TableCell>
                       <TableCell>
-                        {n.sell_time ? (
+                        {n.sell_time || n.sellerid === this.props.netid ? (
                           n.sell_time
-                        ) : n.buyerid ? (
-                          <Button
-                            variant="raised"
-                            color="primary"
-                            className={classes.button}
-                            onClick={() => this.received(n.id)}
-                          >
-                            I've received the item
-                          </Button>
                         ) : (
                           <Button
                             variant="raised"
@@ -261,9 +247,35 @@ class History extends Component {
                             className={classes.button}
                             onClick={() => this.received(n.id)}
                           >
-                            Delete this post
+                            Item received
                           </Button>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          color="primary"
+                          className={classes.button}
+                          aria-label="Edit"
+                          disabled={
+                            !(
+                              n.sellerid === this.props.netid &&
+                              n.buyerid === null
+                            )
+                          }
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color="primary"
+                          className={classes.button}
+                          aria-label="Delete"
+                          disabled={
+                            !(n.buyerid === null || n.buyerid === undefined)
+                          }
+                          onClick={() => this.delete(n.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   );

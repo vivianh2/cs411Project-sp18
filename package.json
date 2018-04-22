@@ -39,8 +39,5 @@
   "devDependencies": {
     "concurrently": "^3.5.1",
     "nodemon": "^1.17.1"
-  },
-  "engines": {
-    "node": "6.11.x"
   }
 }
