@@ -1,5 +1,7 @@
 const express = require("express");
 const { Client } = require("pg");
+const nodemailer = require("nodemailer");
+var smtpTransport = require("nodemailer-smtp-transport");
 const app = express();
 let client;
 
@@ -174,7 +176,6 @@ app.post("/api/create", (req, res) => {
     let price = req.body.price;
     let img_url = req.body.img_url;
 
-    console.log("hehe")
     console.log(img_url)
 
     client.query(
@@ -186,6 +187,8 @@ app.post("/api/create", (req, res) => {
           } else {
             console.log("Insert post done");
             res.sendStatus(200);
+            //send email when there is a new book be posted.
+            sendEmail(req, res);
           }
         }
     );
@@ -204,6 +207,163 @@ app.post("/api/delete", (req, res) => {
       }
     }
   );
-})
+});
+
+function getBookName(req, res, callback) {
+  let isbn = req.body.isbn;
+  let bookName = "";
+  const query = {
+    text: "SELECT name FROM uiuc.book WHERE uiuc.book.isbn = $1;",
+    values: [isbn]
+  };
+
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    //console.log("book name: " + r.rows[0].name);
+    bookName = r.rows[0].name;
+    callback(bookName);
+  });
+}
+
+function getMailList(req, res, callback) {
+  let isbn = req.body.isbn;
+  let mailArray = [];
+
+  const query = {
+    text: "SELECT mailing_list FROM uiuc.book WHERE uiuc.book.isbn = $1;",
+    values: [isbn]
+  };
+
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    //console.log("mail array: " + r.rows[0].mailing_list);
+    mailArray = r.rows[0].mailing_list;
+    callback(mailArray);
+  });
+}
+
+function deleteMailList(req, res, callback) {
+  let delete_ = "";
+  let isbn = req.body.isbn;
+
+  const query = {
+    text: "UPDATE uiuc.book SET mailing_list = NULL WHERE uiuc.book.isbn = $1;",
+    values: [isbn]
+  };
+
+  client.query(query, (err, r) => {
+    if (err) {
+      throw err;
+    } else {
+      console.log("delete mailing_list done");
+    }
+
+    callback(delete_);
+  });
+}
+
+function sendEmail(req, res) {
+  //console.log("name:" + req.body.name); // NO, don't need this. send what you get from post!
+  let isbn = req.body.isbn;
+  let condition = req.body.condition;
+  let price = req.body.price;
+  let bookName = "";
+  let mailArray = "";
+  let mailStr = "";
+  let delete_ = "";
+
+  getBookName(req, res, function(bookName) {
+    getMailList(req, res, function(mailArray) {
+      deleteMailList(req, res, function(delete_) {
+        if (mailArray.length === 0){
+          return;
+        }
+        for (let i = 0; i < mailArray.length - 1; i++) {
+          mailStr =
+            mailStr + mailArray[i].replace(/\s/g, "") + "@illinois.edu, ";
+        }
+
+        mailStr =
+          mailStr +
+          mailArray[mailArray.length - 1].replace(/\s/g, "") +
+          "@illinois.edu";
+        //console.log("mailStr: " + mailStr);
+
+        const output = `
+        <p>One book that you are interested has been posted.</p>
+        <h3>Book Details</h3>
+        <ul>
+          <li>name: ${bookName}</li>
+          <li>condition: ${condition}</li>
+          <li>price: ${price}</li>
+        </ul>
+      `;
+
+        var transporter = nodemailer.createTransport(
+          smtpTransport({
+            service: "gmail",
+            host: "smtp.gmail.com",
+            auth: {
+              user: "noreplyreadmeagain@gmail.com",
+              pass: "whn1234567"
+            }
+          })
+        );
+
+        transporter.set("oauth2_provision_cb", (user, renew, callback) => {
+          let accessToken = userTokens[user];
+          if (!accessToken) {
+            callback(new Error("Unknown user"));
+          } else {
+            callback(null, accessToken);
+          }
+        });
+
+        // setup email data with unicode symbols
+        let mailOptions = {
+          from: '"ReadMeAgain" <noreplyreadmeagain@gmail.com>', // sender address
+          to: mailStr, // list of receivers
+          subject: "Book available", // Subject line
+          text: "Hello world", // plain text body
+          html: output // html body
+        };
+
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return console.log(error);
+          }
+          console.log("Message sent: %s", info.messageId);
+          console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+        });
+      });
+    });
+  });
+}
+
+app.post("/api/email", (req, res) => {
+  //console.log("book:" + req.body.isbn);
+  //add the netid to transaction, how to write this sql? this is a array!
+  let isbn = req.body.isbn;
+  if (netid === null){
+    res.send(401)
+    return;
+  }
+  let id = "{" + netid + "}";
+
+  client.query(
+    "UPDATE uiuc.book set mailing_list = mailing_list || $1 WHERE isbn = $2  AND $1 NOT IN (mailing_list) OR (mailing_list) IS NULL AND isbn = $2;",
+    [id, isbn],
+    (err, r) => {
+      if (err) {
+        throw err;
+      } else {
+        console.log(netid);
+        console.log("add netid to mailing_list, done");
+      }
+    }
+  );
+  console.log("tid: " + netid);
+});
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

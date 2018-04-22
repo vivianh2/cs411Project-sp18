@@ -13,6 +13,7 @@ import Modal from 'material-ui/Modal';
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
 import Snackbar from 'material-ui/Snackbar';
+import Email from 'material-ui-icons/Email';
 
 const isbn = require('node-isbn');
 
@@ -53,7 +54,17 @@ const styles = theme => ({
   },
   divider: {
     margin: '5% 0',
-  }
+  },
+  leftIcon: {
+    marginRight: theme.spacing.unit * 2,
+  },
+  rightIcon: {
+    marginLeft: theme.spacing.unit * 2,
+  },
+  iconSmall: {
+    fontSize: 20,
+    margin: '0 0.3em',
+  },
 });
 
 class Detail extends Component {
@@ -157,6 +168,37 @@ class Item extends Component {
     this.setState({ open: !this.state.open });
   };
 
+  postData(url, data) {
+    // Default options are marked with *
+    return fetch(url, {
+      body: JSON.stringify(data), // must match 'Content-Type' header
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, same-origin, *omit
+      headers: {
+        'content-type': 'application/json'
+      },
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, cors, *same-origin
+      redirect: 'follow', // *manual, follow, error
+      referrer: 'no-referrer', // *client, no-referrer
+    })
+  }
+
+  handleEmail = () => {
+    console.log('isbn: ');
+    console.log(this.state.book.isbn);
+    this.postData('/api/email', {isbn: this.state.book.isbn})
+    .then(response => {
+      if (response.ok){
+        alert("Your email has been recorded");
+      } else {
+        alert(response.status + " " + response.statusText);
+      }
+    }).catch(error => {
+      console.error(error)
+    });
+  }
+
   render(){
     const { classes } = this.props;
 
@@ -183,6 +225,10 @@ class Item extends Component {
             { posts }
           </List>
         </Collapse>
+        <Button color="primary" onClick={this.handleEmail}>
+          <Email className={classes.leftIcon, classes.iconSmall}/>
+          Email Me when new book get posted
+        </Button>
       </div>
     );
   }
