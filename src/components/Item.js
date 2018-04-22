@@ -56,92 +56,6 @@ const styles = theme => ({
   }
 });
 
-class Snack extends React.Component {
-  state = {
-    open: false,
-    message: "You're offline"
-  };
-
-  postData(url, data) {
-    // Default options are marked with *
-    return fetch(url, {
-      body: JSON.stringify(data), // must match 'Content-Type' header
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, same-origin, *omit
-      headers: {
-        'content-type': 'application/json'
-      },
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, cors, *same-origin
-      redirect: 'follow', // *manual, follow, error
-      referrer: 'no-referrer', // *client, no-referrer
-    })
-  }
-
-  handleClick = () => {
-    this.setState({ open: true });
-
-    this.postData('/api/purchase', {tid: this.props.tid})
-      .then(response => {
-        if (response.ok){
-          this.setState({
-            message: "You're all set! Please come back to your account page and confirm your purchase after you received the item.",
-          });
-        } else if (response.status === 401) {
-          this.setState({
-            message: "Please login first",
-          });
-        } else if (response.status === 555){
-          this.setState({
-            message: "Item sold out, please refresh page :<",
-          });
-        } else if (!response.ok){
-          this.setState({
-            message: response.status + " " + response.statusText,
-          });
-        }
-      })
-      .catch(error => {
-        console.error(error)
-      });
-  };
-
-  handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    this.setState({ open: false });
-  };
-
-  render() {
-    const { classes } = this.props;
-    return (
-      <div>
-        <Button onClick={this.handleClick}>I've contact the seller and set up a pickup time and location.</Button>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          open={this.state.open}
-          autoHideDuration={6000}
-          onClose={this.handleClose}
-          SnackbarContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-          message={<span id="message-id">{this.state.message}</span>}
-        />
-      </div>
-    );
-  }
-}
-
-Snack.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-
 class Detail extends Component {
   state = {
     open: false,
@@ -201,9 +115,6 @@ class Detail extends Component {
                       {this.props.post.contact}
                     </Typography>
                   </CardContent>
-                  <CardActions>
-                    <Snack classes={classes} tid={this.props.post.tid}/>
-                  </CardActions>
                 </div>
               </Card>
               </Modal>

@@ -104,9 +104,9 @@ app.get("/api/history", (req, res) => {
   console.log("History " + req.query.id);
   const query = {
     text:
-      "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time " +
-      "FROM uiuc.transaction t, uiuc.book b, uiuc.user u " +
-      "WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid",
+      "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time, t.price \
+       FROM uiuc.transaction t, uiuc.book b, uiuc.user u \
+       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid",
     values: [req.query.id]
   };
   client.query(query, (err, r) => {
@@ -116,41 +116,24 @@ app.get("/api/history", (req, res) => {
   });
 });
 
-app.post("/api/purchase", (req, res) => {
-  var tid = req.body.tid;
-  if (tid != null) {
-    // update database
-    // if the item is sold, do res.sendStatus(555);
-
-    console.log("purchase " + tid);
-    console.log("purchase " + netid);
-    console.log("purchase " + req.body);
-
-    client.query(
-      "SELECT buyerid FROM uiuc.transaction WHERE tid = $1",
-      [tid],
-      (err, r) => {
-        if (r != null) {
-          res.sendStatus(555);
-        } else {
-          client.query(
-            "UPDATE uiuc.transaction SET buyerid = $1 WHERE tid = $2",
-            [netid, tid],
-            (err, r) => {
-              console.log("purchase done");
-            }
-          );
-        }
-      }
-    );
-
-    res.sendStatus(200);
-  } else {
-    // not authorize
-    console.log("purchase " + tid);
-    res.sendStatus(401);
-  }
-});
+app.post("/api/update", (req, res) => {
+  console.log("Update " + req.body.tid)
+  let price = req.body.price.slice(1)
+  console.log(price)
+  console.log(req.body.buyer)
+  const query = {
+    text:
+      "UPDATE uiuc.transaction SET price = $1, buyerid = $2 WHERE tid = $3",
+    values: [price, req.body.buyer, req.body.tid]
+  };
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    res.send({
+      price: req.body.price,
+      buyer: req.body.buyer
+    })
+  });
+})
 
 app.post("/api/received", (req, res) => {
   // update selltime in database
@@ -175,9 +158,9 @@ app.post("/api/received", (req, res) => {
 });
 
 app.post("/api/create", (req, res) => {
-    var isbn = req.body.isbn;
-    var condition = req.body.condition;
-    var price = req.body.price;
+    let isbn = req.body.isbn;
+    let condition = req.body.condition;
+    let price = req.body.price;
 
     client.query(
         "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, post_time) VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP);",
