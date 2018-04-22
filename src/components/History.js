@@ -242,6 +242,7 @@ class History extends Component {
   };
 
   update = id => {
+    let that = this;
     this.postData("/api/update", {
       tid: this.state.history[id].tid,
       price: this.state.price,
@@ -256,6 +257,7 @@ class History extends Component {
             this.setState({
               history: history
             });
+            that.handleClose();
           });
         } else{
           alert(response.status + " " + response.statusText);
@@ -269,7 +271,6 @@ class History extends Component {
     const { history, rowsPerPage, page } = this.state;
     const emptyRows =
       rowsPerPage - Math.min(rowsPerPage, history.length - page * rowsPerPage);
-    console.log(history);
     return (
       <div className={classes.root}>
         <Typography variant="headline" color="inherit">
