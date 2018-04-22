@@ -7,6 +7,7 @@ import { ListItemIcon, ListItemText } from "material-ui/List";
 import AccountIcon from "material-ui-icons/AccountCircle";
 import HistoryIcon from "material-ui-icons/History";
 import ChatIcon from "material-ui-icons/Chat";
+import Paper from "material-ui/Paper";
 
 import Ratings from "./Ratings";
 import History from "./History";
@@ -122,7 +123,9 @@ class Account extends Component {
           }
           {
             this.state.selectedItem === "chatroom" &&
+            <Paper>
               <Chatroom netid={this.state.netid}/>
+            </Paper>
           }
         </Grid>
       </Grid>

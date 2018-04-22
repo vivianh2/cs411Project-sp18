@@ -67,7 +67,6 @@ class Chatroom extends Component {
 
         return (
             <div className="chatroom">
-              <h1>Chilltime</h1>
                 <ul className="chats" ref="chats">
                     {
                         chats.map((chat) =>
