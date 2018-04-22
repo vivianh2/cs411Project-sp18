@@ -109,7 +109,6 @@ class Account extends Component {
               <History netid={this.state.netid} />
           }
         </Grid>
-      </Grid>
     );
   }
 }

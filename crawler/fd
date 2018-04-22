@@ -1,0 +1,912 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 10.3
+-- Dumped by pg_dump version 10.3
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: uiuc; Type: SCHEMA; Schema: -; Owner: fd
+--
+
+CREATE SCHEMA uiuc;
+
+
+ALTER SCHEMA uiuc OWNER TO fd;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- Name: cond; Type: TYPE; Schema: public; Owner: fd
+--
+
+CREATE TYPE public.cond AS ENUM (
+    'New',
+    'Like New',
+    'Good',
+    'Acceptable',
+    'Unacceptable'
+);
+
+
+ALTER TYPE public.cond OWNER TO fd;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: book; Type: TABLE; Schema: uiuc; Owner: fd
+--
+
+CREATE TABLE uiuc.book (
+    isbn character(13) NOT NULL,
+    name text,
+    pic_url text
+);
+
+
+ALTER TABLE uiuc.book OWNER TO fd;
+
+--
+-- Name: class; Type: TABLE; Schema: uiuc; Owner: fd
+--
+
+CREATE TABLE uiuc.class (
+    subject character varying(5) NOT NULL,
+    number smallint NOT NULL,
+    coursename text,
+    isbn_list character(13)[]
+);
+
+
+ALTER TABLE uiuc.class OWNER TO fd;
+
+--
+-- Name: dept; Type: TABLE; Schema: uiuc; Owner: fd
+--
+
+CREATE TABLE uiuc.dept (
+    code character varying(5) NOT NULL,
+    name text
+);
+
+
+ALTER TABLE uiuc.dept OWNER TO fd;
+
+--
+-- Name: transaction; Type: TABLE; Schema: uiuc; Owner: fd
+--
+
+CREATE TABLE uiuc.transaction (
+    tid integer NOT NULL,
+    sell_time timestamp without time zone,
+    condition public.cond,
+    post_time timestamp without time zone,
+    price money,
+    buyerid character varying(10),
+    sellerid character varying(10),
+    isbn character(13),
+    img_url character varying(100)
+);
+
+
+ALTER TABLE uiuc.transaction OWNER TO fd;
+
+--
+-- Name: transaction_tid_seq; Type: SEQUENCE; Schema: uiuc; Owner: fd
+--
+
+CREATE SEQUENCE uiuc.transaction_tid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE uiuc.transaction_tid_seq OWNER TO fd;
+
+--
+-- Name: transaction_tid_seq; Type: SEQUENCE OWNED BY; Schema: uiuc; Owner: fd
+--
+
+ALTER SEQUENCE uiuc.transaction_tid_seq OWNED BY uiuc.transaction.tid;
+
+
+--
+-- Name: user; Type: TABLE; Schema: uiuc; Owner: fd
+--
+
+CREATE TABLE uiuc."user" (
+    netid character varying(10) NOT NULL,
+    rating double precision DEFAULT 5.0,
+    uname text
+);
+
+
+ALTER TABLE uiuc."user" OWNER TO fd;
+
+--
+-- Name: transaction tid; Type: DEFAULT; Schema: uiuc; Owner: fd
+--
+
+ALTER TABLE ONLY uiuc.transaction ALTER COLUMN tid SET DEFAULT nextval('uiuc.transaction_tid_seq'::regclass);
+
+
+--
+-- Data for Name: book; Type: TABLE DATA; Schema: uiuc; Owner: fd
+--
+
+COPY uiuc.book (isbn, name, pic_url) FROM stdin;
+9780824821524	Japanese Culture Updtd & Expd	https://www.bookstore.illinois.edu/textbooks/cover_image.asp?Key=9780824821524&Size=M&p=
+9780679752691	Some Prefer Nettles	https://www.bookstore.illinois.edu/textbooks/cover_image.asp?Key=9780679752691&Size=M&p=
+9780321964267	Perspectives On Argument	https://www.bookstore.illinois.edu/textbooks/cover_image.asp?Key=9780321964267&Size=M&p=
+9780134701332	Simon & Schuster Handbook For Writers 2016 Mla Update	https://www.bookstore.illinois.edu/textbooks/cover_image.asp?Key=9780134701332&Size=M&p=
+9780385480017	Bird By Bird	https://www.bookstore.illinois.edu/textbooks/cover_image.asp?Key=9780385480017&Size=M&p=
+\.
+
+
+--
+-- Data for Name: class; Type: TABLE DATA; Schema: uiuc; Owner: fd
+--
+
+COPY uiuc.class (subject, number, coursename, isbn_list) FROM stdin;
+HIST	142	Western Civ Since 1660	\N
+BADM	314	Leading Negotiations	\N
+EALC	588	Sem Second Lang Learn	\N
+HIST	259	20thC World from Midcentury	\N
+BADM	356	Data Science and Analytics	\N
+MATH	423	Differential Geometry	\N
+MATH	444	Elementary Real Analysis	\N
+MATH	453	Elementary Theory of Numbers	\N
+STAT	542	Statistical Learning	\N
+BADM	512	HR Management and Strategy	\N
+MATH	540	Real Analysis	\N
+CS	101	Intro Computing: Engrg & Sci	\N
+MATH	115	Preparation for Calculus	\N
+CHEM	295	Chemistry Internship	\N
+PHYS	420	Space, Time, and Matter	\N
+STAT	212	Biostatistics	\N
+CHEM	499	Senior Thesis	\N
+CHEM	532	Physical Organic Chemistry	\N
+STAT	588	Covar Struct and Factor Models	\N
+BADM	593	Research in Special Fields	\N
+BADM	199	Undergraduate Open Seminar	\N
+EALC	398	Colloquium in EALC	\N
+CS	361	Probability & Statistics for Computer Science	\N
+MATH	299	Topics in Mathematics	\N
+PHYS	466	Atomic Scale Simulations	\N
+CS	483	Applied Parallel Programming	\N
+HIST	483	Race, Science, and Medicine	\N
+HIST	502	Prob in Comparative History	\N
+CS	597	Individual Study	\N
+CHEM	202	Accelerated Chemistry I	\N
+PHYS	298	Freshmen/Sophomore Special Topics in Physics	\N
+CHEM	397	Individual Study Junior	\N
+HIST	286	US Gender History Since 1877	\N
+CS	439	Wireless Networks	\N
+CS	461	Computer Security I	\N
+BADM	445	Small Business Consulting	\N
+CHEM	592	Preparing Graduate Fellowships	\N
+MATH	502	Commutative Algebra	\N
+BADM	549	Current Strategy Research	\N
+MATH	595	Advanced Topics in Mathematics	\N
+CS	196	Freshman Honors	\N
+HIST	172	US Hist Since 1877	\N
+BADM	324	Purchasing and Supply Mgmnt	\N
+CS	411	Database Systems	\N
+MATH	399	Math/Actuarial Internship	\N
+HIST	347	Protestant & Catholic Refs	\N
+BADM	377	Project Management	\N
+BADM	394	Senior Research I	\N
+STAT	440	Statistical Data Management	\N
+MATH	484	Nonlinear Programming	\N
+CS	541	Computer Systems Analysis	\N
+BADM	594	Independent Study and Research	\N
+PHYS	110	Physics Careers	\N
+MATH	199	Undergraduate Open Seminar	\N
+CHEM	445	Physical Principles Lab I	\N
+PHYS	496	Intro to Physics Research	\N
+STAT	400	Statistics and Probability I	\N
+STAT	428	Statistical Computing	\N
+CS	498	Special Topics	\N
+MATH	542	Complex Variables I	\N
+MATH	597	Reading Course	\N
+RHET	105	Writing and Research	{9780321964267,9780134701332,9780385480017}
+BADM	310	Mgmt and Organizational Beh	\N
+CHEM	233	Elementary Organic Chem Lab I	\N
+MATH	413	Intro to Combinatorics	\N
+HIST	422	Soc-Econ Hist Modern China	\N
+BADM	513	Communication Strategy in Bus	\N
+CS	598	Special Topics	\N
+HIST	120	East Asian Civilizations	\N
+EALC	490	Individual Study	\N
+PHYS	402	Light	\N
+BADM	330	Brand Management	\N
+CS	420	Parallel Progrmg: Sci & Engrg	\N
+CHEM	492	Special Topics in Chemistry	\N
+HIST	394	Hidden Political Figures	\N
+PHYS	598	Special Topics in Physics	\N
+STAT	552	Theory of Probability II	\N
+STAT	590	Individual Study and Research	\N
+BADM	553	Ethical Dilemmas in Business	\N
+BADM	595	Business Fundamentals	\N
+EALC	305	Japan Lit in Translation I	\N
+CS	241	System Programming	\N
+HIST	212	History of Eastern Africa	\N
+BADM	350	IT for Networked Organizations	\N
+HIST	373	Origins of the Civil War	\N
+PHYS	570	Subatomic Physics	\N
+CHEM	570	Concepts in Chemical Biology	\N
+BADM	502	Communicating with Data and Decision Making	\N
+HIST	560	Problems in Russian History	\N
+MATH	599	Thesis Research	\N
+CHEM	104	General Chemistry II	\N
+PHYS	213	Univ Physics: Thermal Physics	\N
+MATH	231	Calculus II	\N
+CS	427	Software Engineering I	\N
+PHYS	510	Nonlinear Dynamics	\N
+CHEM	534	Advanced Organic Synthesis	\N
+MATH	461	Probability Theory	\N
+MATH	506	Group Representation Theory	\N
+MATH	545	Harmonic Analysis	\N
+BADM	599	Dissertation Research	\N
+HIST	143	Western Civ Since 1660-ACP	\N
+BADM	320	Principles of Marketing	\N
+EALC	590	Individual Study and Research	\N
+HIST	271	Nineteenth Century America	\N
+STAT	361	Probability & Statistics for Computer Science	\N
+MATH	424	Honors Real Analysis	\N
+MATH	446	Applied Complex Variables	\N
+HIST	488	The American Political Divide	\N
+CS	548	Models of Cognitive Processes	\N
+CS	599	Thesis Research	\N
+CS	105	Intro Computing: Non-Tech	\N
+MATH	119	Ideas in Geometry	\N
+CHEM	297	Individual Study Sophomore	\N
+PHYS	427	Thermal & Statistical Physics	\N
+HIST	300	Topics in Film and History	\N
+BADM	365	New Product Marketing	\N
+CHEM	512	Advanced Inorganic Chemistry	\N
+CS	484	Parallel Programming	\N
+CHEM	599	Thesis Research	\N
+BADM	554	Enterprise Database Management	\N
+BADM	210	Business Analytics I	\N
+CHEM	203	Accelerated Chemistry Lab I	\N
+CS	374	Introduction to Algorithms & Models of Computation	\N
+MATH	347	Fundamental Mathematics	\N
+PHYS	475	Introduction to Biophysics	\N
+CS	465	User Interface Design	\N
+BADM	446	Entrepreneurship Sm Bus Form	\N
+MATH	487	Advanced Engineering Math	\N
+BADM	514	Managing Innovation	\N
+EALC	403	Word and Image in Chinese Art	\N
+PHYS	325	Classical Mechanics I	\N
+CHEM	420	Instrumental Characterization	\N
+MATH	402	Non Euclidean Geometry	\N
+CS	440	Artificial Intelligence	\N
+BADM	395	Senior Research II	\N
+STAT	443	Professional Statistics	\N
+CS	499	Senior Thesis	\N
+STAT	593	STAT Internship	\N
+MATH	546	Hilbert Spaces	\N
+PHYS	150	Physics of Societal Issues	\N
+CS	199	Undergraduate Open Seminar in Computer Science	\N
+HIST	174	Black America, 1619-Present	\N
+BADM	325	Consumer Behavior	\N
+CS	412	Introduction to Data Mining	\N
+CHEM	447	Physical Principles Lab II	\N
+HIST	352	Europe in the World	\N
+BADM	378	Logistics Management	\N
+STAT	429	Time Series Analysis	\N
+HIST	572	Prob in US Hist Since 1815	\N
+BADM	559	Enterprise IT Governance	\N
+MATH	213	Basic Discrete Mathematics	\N
+PHYS	497	Individual Study	\N
+STAT	409	Actuarial Statistics II	\N
+HIST	440	Roman Republic to 44 B C	\N
+STAT	553	Probability and Measure I	\N
+MATH	512	Modern Algebraic Geometry	\N
+MATH	101	Thinking Mathematically	\N
+BADM	311	Individual Behavior in Orgs	\N
+EALC	500	Proseminar in EALC	\N
+RHET	199	Undergraduate Open Seminar	\N
+CS	421	Progrmg Languages & Compilers	\N
+MATH	415	Applied Linear Algebra	\N
+HIST	395	Topics in Law and Society	\N
+PHYS	599	Thesis Research	\N
+BADM	503	Classics in Business Admin	\N
+CS	549	Seminar in Cognitive Science	\N
+MATH	550	Dynamical Systems I	\N
+HIST	130	History of South Asia	\N
+CHEM	236	Fundamental Organic Chem I	\N
+PHYS	403	Modern Experimental Physics	\N
+BADM	332	Sustainable Product Design & Marketing Plans I: Bottom-Up Immersion in Subsistence Marketplaces	\N
+BADM	351	E-Business Management	\N
+CHEM	494	Lab Safety Fundamentals	\N
+HIST	380	US in an Age of Empire	\N
+PHYS	580	Quantum Mechanics I	\N
+CHEM	575	Chemical Biology Seminar	\N
+BADM	562	Social Media Strategy	\N
+EALC	367	History of Korea	\N
+CS	242	Programming Studio	\N
+HIST	240	Ancient Greek Civilization	\N
+PHYS	515	General Relativity I	\N
+CHEM	535	Organic Chemistry Seminar	\N
+MATH	463	Statistics and Probability I	\N
+HIST	490	Honors Independent Study	\N
+BADM	520	Marketing Management	\N
+CHEM	105	General Chemistry Lab II	\N
+PHYS	214	Univ Physics: Quantum Physics	\N
+MATH	241	Calculus III	\N
+CS	433	Computer System Organization	\N
+MATH	427	Honors Abstract Algebra	\N
+MATH	447	Real Variables	\N
+MATH	489	Dynamics & Differential Eqns	\N
+STAT	599	Thesis Research	\N
+MATH	554	Linear Analysis and Partial Differential Equations	\N
+HIST	164	The Automobile	\N
+BADM	321	Principles of Retailing	\N
+EALC	599	Thesis Research	\N
+HIST	277	Encounters in Native America	\N
+HIST	310	Global Capitalism in History	\N
+BADM	367	Mgmt of Innov and Technology	\N
+CHEM	515	Inorganic Chemistry Seminar	\N
+CS	491	Seminar	\N
+CS	510	Advanced Information Retrieval	\N
+HIST	591	History and Social Theory	\N
+BADM	566	Supply Chain Management	\N
+CS	125	Intro to Computer Science	\N
+MATH	124	Finite Mathematics	\N
+CHEM	312	Inorganic Chemistry	\N
+PHYS	435	Electromagnetic Fields I	\N
+PHYS	485	Atomic Phys & Quantum Theory	\N
+STAT	385	Statistics Programming Methods	\N
+CS	468	Tech and Advertising Campaigns	\N
+BADM	449	Business Policy and Strategy	\N
+MATH	514	Complex Algebraic Geometry	\N
+EALC	114	Introduction to East Asian Art	\N
+BADM	261	Technology & Mgmt Seminar	\N
+CHEM	222	Quantitative Analysis Lecture	\N
+PHYS	326	Classical Mechanics II	\N
+CS	397	Individual Study	\N
+MATH	357	Numerical Methods I	\N
+MATH	403	Euclidean Geometry	\N
+CS	446	Machine Learning	\N
+BADM	403	Corporate & Commercial Law	\N
+STAT	448	Advanced Data Analysis	\N
+BADM	504	Phil of Science and Bus Admin	\N
+CS	556	Iterative & Multigrid Methods	\N
+MATH	558	Methods of Applied Mathematics	\N
+EALC	120	East Asian Civilizations	\N
+EALC	412	Mod Chinese Lit in Translation	\N
+CHEM	440	Physical Chemistry Principles	\N
+CHEM	480	Polymer Chemistry	\N
+BADM	380	International Business	\N
+STAT	430	Topics in Applied Statistics	\N
+STAT	555	Applied Stochastic Processes	\N
+BADM	567	Process Management	\N
+PHYS	199	Undergraduate Open Seminar	\N
+CS	210	Ethical & Professional Issues	\N
+HIST	199	Undergraduate Open Seminar	\N
+BADM	326	Pricing Policies	\N
+CS	413	Intro to Combinatorics	\N
+HIST	355	Soviet Jewish History	\N
+STAT	410	Statistics and Probability II	\N
+HIST	472	Immigrant America	\N
+HIST	493	Honors Senior Thesis	\N
+BADM	525	New Product Development	\N
+MATH	220	Calculus	\N
+CS	424	Real-Time Systems	\N
+PHYS	498	Special Topics in Physics	\N
+HIST	397	Sexuality in Modern Europe	\N
+CHEM	584	Introduction to Materials Chem	\N
+MATH	490	Advanced Topics in Mathematics	\N
+HIST	593	Approaches to History	\N
+MATH	562	Theory of Probability II	\N
+EALC	199	Undergraduate Open Seminar	\N
+HIST	140	Western Civ to 1660-ACP	\N
+BADM	312	Org Design and Environment	\N
+CHEM	237	Structure and Synthesis	\N
+RHET	233	Adv Rhetoric & Composition	\N
+BADM	352	Database Design and Management	\N
+MATH	416	Abstract Linear Algebra	\N
+HIST	385	Transnational Sexualities	\N
+PHYS	582	General Field Theory	\N
+MATH	464	Statistics and Probability II	\N
+CS	513	Theory & Practice of Data Cleaning	\N
+MATH	518	Differentiable Manifolds I	\N
+BADM	572	Stat for Mgt Decision Making	\N
+MATH	103	Theory of Arithmetic	\N
+EALC	550	Seminar in EALC	\N
+PHYS	404	Electronic Circuits	\N
+BADM	335	Supply Chain Management Basics	\N
+STAT	100	Statistics	\N
+CHEM	495	Teaching Secondary Chemistry	\N
+PHYS	540	Astrophysics	\N
+CHEM	540	Quantum Mechanics	\N
+CS	563	Advanced Computer Security	\N
+MATH	563	Risk Modeling and Analysis	\N
+PHYS	100	Thinking About Physics	\N
+EALC	390	Individual Study	\N
+CS	296	Honors Course	\N
+HIST	256	Britain and World Since 1688	\N
+MATH	441	Differential Equations	\N
+MATH	448	Complex Variables	\N
+CS	493	Senior Project II, ACP	\N
+BADM	507	Emp. Res. Methods in Bus. Adm.	\N
+CHEM	197	Individual Study Freshman	\N
+PHYS	222	Enrichment E & M	\N
+MATH	285	Intro Differential Equations	\N
+CS	436	Computer Networking Laboratory	\N
+CHEM	520	Advanced Analytical Chemistry	\N
+BADM	453	Decision Support Systems	\N
+STAT	558	Risk Modeling and Analysis	\N
+BADM	528	Promotional Strategy	\N
+BADM	576	Data Science and Analytics	\N
+EALC	250	Intro to Japanese Culture	{9780824821524,9780679752691}
+CS	126	Software Design Studio	\N
+HIST	170	US Hist to 1877-ACP	\N
+BADM	322	Marketing Research	\N
+CHEM	315	Instrumental Chem Systems Lab	\N
+HIST	281	Constructing Race in America	\N
+HIST	325	History of Korea	\N
+BADM	374	Management Decision Models	\N
+CS	473	Algorithms	\N
+STAT	510	Mathematical Statistics I	\N
+HIST	495	Honors Research & Writing Sem	\N
+HIST	596	Individual Research Project	\N
+MATH	564	Applied Stochastic Processes	\N
+CHEM	101	Introductory Chemistry	\N
+MATH	125	Elementary Linear Algebra	\N
+CS	398	Special Topics	\N
+PHYS	436	Electromagnetic Fields II	\N
+PHYS	486	Quantum Physics I	\N
+STAT	390	Individual Study	\N
+CS	447	Natural Language Processing	\N
+BADM	420	Advanced Marketing Management	\N
+MATH	492	Undergraduate Research in Math	\N
+MATH	526	Algebraic Topology II	\N
+BADM	300	The Legal Environment of Bus	\N
+CHEM	223	Quantitative Analysis Lab	\N
+PHYS	329	Atmospheric Dynamics I	\N
+MATH	362	Probability with Engrg Applic	\N
+MATH	409	Actuarial Statistics II	\N
+BADM	381	Multinational Management	\N
+STAT	432	Basics of Statistical Learning	\N
+HIST	476	History of the American West	\N
+CS	522	Programming Language Semantics	\N
+CS	571	Combinatorial Mathematics	\N
+BADM	582	Multinational Management	\N
+PHYS	101	College Physics: Mech & Heat	\N
+EALC	415	Mod Japan Lit in Translation	\N
+BADM	327	Marketing to Business and Govt	\N
+CHEM	442	Physical Chemistry I	\N
+CHEM	483	Solid State Structural Anlys	\N
+STAT	420	Methods of Applied Statistics	\N
+CHEM	585	Materials Chemistry Seminar	\N
+MATH	570	Mathematical Logic	\N
+PHYS	211	University Physics: Mechanics	\N
+CS	225	Data Structures	\N
+HIST	200	Intro Hist Interpretation	\N
+CS	418	Interactive Computer Graphics	\N
+HIST	357	Modern France	\N
+HIST	398	Internship in Public History	\N
+MATH	473	Algorithms	\N
+BADM	508	Leadership and Teams	\N
+BADM	532	Sustainable Product Design & Enterprise Plan Development - I: Bottom-Up Immersion & Design	\N
+HIST	100	Global History	\N
+MATH	221	Calculus I	\N
+CS	425	Distributed Systems	\N
+PHYS	505	Classical Electromagnetism	\N
+HIST	390	Sport and Society	\N
+PHYS	596	Graduate Physics Orientation	\N
+STAT	571	Multivariate Analysis	\N
+HIST	597	Reading Course	\N
+BADM	586	Intl Comparative Management	\N
+EALC	275	Masterpieces of East Asian Lit	\N
+HIST	141	Western Civ to 1660	\N
+BADM	313	Human Resource Management	\N
+EALC	560	East Asian Language Pedagogy	\N
+PHYS	419	Space, Time, and Matter-ACP	\N
+BADM	336	Modeling the Supply Chain	\N
+BADM	353	Info Sys Analysis and Design	\N
+MATH	417	Intro to Abstract Algebra	\N
+PHYS	561	Condensed Matter Physics II	\N
+CHEM	544	Statistical Thermodynamics	\N
+CS	494	Senior Project II	\N
+HIST	498	Research and Writing Seminar	\N
+MATH	531	Analytic Theory of Numbers I	\N
+CHEM	102	General Chemistry I	\N
+MATH	112	Algebra	\N
+CHEM	293	Cooperative Education Practice	\N
+HIST	258	20thC World to Midcentury	\N
+STAT	200	Statistical Analysis	\N
+CHEM	497	Individual Study Senior	\N
+MATH	442	Intro Partial Diff Equations	\N
+MATH	450	Numerical Analysis	\N
+BADM	458	IT Governance	\N
+MATH	499	Introduction Graduate Research	\N
+CS	584	Embedded System Verification	\N
+MATH	580	Combinatorial Mathematics	\N
+EALC	391	Honors Tutorial	\N
+CS	357	Numerical Methods I	\N
+MATH	286	Intro to Differential Eq Plus	\N
+CHEM	525	Analytical Chemistry Seminar	\N
+STAT	525	Computational Statistics	\N
+CS	524	Concurrent Progrmg Languages	\N
+BADM	588	Business Practice Immersion	\N
+CS	100	Freshman Orientation	\N
+CHEM	199	Undergraduate Open Seminar	\N
+PHYS	225	Relativity & Math Applications	\N
+CHEM	332	Elementary Organic Chem II	\N
+PHYS	460	Condensed Matter Physics	\N
+CS	438	Communication Networks	\N
+CS	481	Stochastic Processes & Applic	\N
+BADM	535	Global Business	\N
+MATH	583	Partial Orders and Comb Optim	\N
+CS	173	Discrete Structures	\N
+HIST	171	US Hist to 1877	\N
+BADM	323	Marketing Communications	\N
+CS	410	Text Information Systems	\N
+HIST	285	US Gender History to 1877	\N
+HIST	335	Middle East 1566-1914	\N
+BADM	375	Operations Management	\N
+CS	450	Numerical Analysis	\N
+BADM	436	Intl Business Immersion	\N
+HIST	478	Black Freed Move, 1955-Present	\N
+BADM	509	Managing Organizations	\N
+HIST	598	Teaching of College History	\N
+MATH	181	A Mathematical World	\N
+MATH	390	Individual Study	\N
+PHYS	487	Quantum Physics II	\N
+STAT	391	Honors Individual Study	\N
+BADM	382	International Marketing	\N
+STAT	434	Survival Analysis	\N
+CHEM	590	Special Topics in Chemistry	\N
+STAT	578	Topics in Statistics	\N
+MATH	535	General Topology	\N
+BADM	590	Seminar in Business Admin	\N
+PHYS	102	College Physics: E&M & Modern	\N
+BADM	303	Principles of Public Policy	\N
+CHEM	232	Elementary Organic Chemistry I	\N
+RHET	101	Principles of Writing	\N
+CHEM	444	Physical Chemistry II	\N
+MATH	412	Graph Theory	\N
+STAT	425	Applied Regression and Design	\N
+MATH	482	Linear Programming	\N
+HIST	499	Thesis Seminar	\N
+CS	591	Advanced Seminar	\N
+HIST	106	Modern Latin America	\N
+EALC	421	Soc-Econ Hist Modern China	\N
+PHYS	401	Classical Physics Lab	\N
+BADM	329	New Product Development	\N
+CHEM	488	Surfaces and Colloids	\N
+HIST	399	Independent Study	\N
+CS	497	CS Team Project	\N
+MATH	500	Abstract Algebra I	\N
+MATH	586	Algebraic Combinatorics	\N
+EALC	287	Introduction to Buddhism	\N
+CS	233	Computer Architecture	\N
+HIST	203	Reacting to the Past	\N
+CS	419	Production Computer Graphics	\N
+HIST	365	Fict & Historical Imagination	\N
+HIST	392	The 1960s in the U.S.	\N
+PHYS	597	Individual Study	\N
+CS	536	Fault-Tolerant Dig Syst Design	\N
+BADM	540	Frontiers in Technology	\N
+BADM	591	Proseminar in Business Admin	\N
+CHEM	103	General Chemistry Lab I	\N
+PHYS	212	University Physics: Elec & Mag	\N
+MATH	225	Introductory Matrix Theory	\N
+BADM	340	Ethical Dilemmas of Business	\N
+CS	426	Compiler Construction	\N
+PHYS	508	Mathematical Physics I	\N
+PHYS	565	Theory of Semicond & Devices	\N
+CHEM	545	Physical Chemistry Seminar	\N
+BADM	460	Business Process Modeling	\N
+HIST	599	Thesis Research	\N
+MATH	593	Mathematical Internship	\N
+\.
+
+
+--
+-- Data for Name: dept; Type: TABLE DATA; Schema: uiuc; Owner: fd
+--
+
+COPY uiuc.dept (code, name) FROM stdin;
+FAKE	FAKE NAME
+AAS	Asian American Studies
+ABE	Agricultural and Biological Engineering
+ACCY	Accountancy
+ACE	Agricultural and Consumer Economics
+ACES	Agricultural, Consumer and Environmental Sciences
+ADV	Advertising
+AE	Aerospace Engineering
+AFAS	Air Force Aerospace Studies
+AFRO	African American Studies
+AFST	African Studies
+AGCM	Agricultural Communications
+AGED	Agricultural Education
+AHS	Applied Health Sciences Courses
+AIS	American Indian Studies
+ANSC	Animal Sciences
+ANTH	Anthropology
+ARAB	Arabic
+ARCH	Architecture
+ART	Art
+ARTD	Art--Design
+ARTE	Art--Education
+ARTF	Art--Foundation
+ARTH	Art--History
+ARTS	Art--Studio
+ASRM	Actuarial Science and Risk Management
+ASST	Asian Studies
+ASTR	Astronomy
+ATMS	Atmospheric Sciences
+BADM	Business Administration
+BASQ	Basque
+BCS	Bosnian-Croatian-Serbian
+BIOC	Biochemistry
+BIOE	Bioengineering
+BIOL	Biology
+BIOP	Biophysics
+BSE	Biomedical Sciences and Engineering
+BTW	Business and Technical Writing
+BUS	Business
+CATL	Catalan
+CB	Comparative Biosciences
+CDB	Cell and Developmental Biology
+CEE	Civil and Environmental Engineering
+CHBE	Chemical and Biomolecular Engineering
+CHEM	Chemistry
+CHIN	Chinese
+CHLH	Community Health
+CHP	Campus Honors Program Courses
+CI	Curriculum and Instruction
+CIC	Committee on Inst Cooperation
+CLCV	Classical Civilization
+CLE	Clinical Sciences and Engineering
+CMN	Communication
+CPSC	Crop Sciences
+CS	Computer Science
+CSE	Computational Science and Engineering
+CW	Creative Writing
+CWL	Comparative and World Literature
+CZCH	Czech
+DANC	Dance
+EALC	East Asian Language and Culture
+ECE	Electrical and Computer Engineering
+ECON	Economics
+EDPR	Educational Practice
+EDUC	Education
+EIL	English as an International Language
+ENG	Engineering
+ENGH	Engineering Honors
+ENGL	English
+ENSU	Environmental Sustainability
+ENT	Entomology
+ENVS	Environmental Studies
+EOL	Educational Organization and Leadership
+EPOL	Education Policy, Organization and Leadership
+EPS	Educational Policy Studies
+EPSY	Educational Psychology
+ESE	Earth, Society, and Environment
+ESL	English as a Second Language
+EURO	European Union Studies
+FAA	Fine and Applied Arts
+FIN	Finance
+FLTE	Foreign Language Teacher Education
+FR	French
+FSHN	Food Science and Human Nutrition
+GC	Graduate College
+GCL	Grand Challenge Learning
+GEOG	Geography
+GEOL	Geology
+GER	German
+GLBL	Global Studies
+GMC	Germanic
+GRK	Greek
+GRKM	Modern Greek
+GS	General Studies
+GWS	Gender and Women's Studies
+HDFS	Human Development and Family Studies
+HEBR	Hebrew, Modern and Classical
+HIST	History
+HNDI	Hindi
+HORT	Horticulture
+HRD	Human Resource Development
+HUM	Humanities Courses
+IB	Integrative Biology
+IE	Industrial Engineering
+IHLT	i-Health Program
+INFO	Informatics
+IS	Information Sciences
+ITAL	Italian
+JAPN	Japanese
+JOUR	Journalism
+JS	Jewish Studies
+KIN	Kinesiology
+KOR	Korean
+LA	Landscape Architecture
+LAS	Liberal Arts and Sciences
+LAST	Latin American and Caribbean Studies
+LAT	Latin
+LAW	Law
+LER	Labor and Employment Relations
+LING	Linguistics
+LLS	Latina/Latino Studies
+MACS	Media and Cinema Studies
+MATH	Mathematics
+MBA	Regular MBA Program Administration
+MCB	Molecular and Cell Biology
+MDIA	Media
+MDVL	Medieval Studies
+ME	Mechanical Engineering
+MICR	Microbiology
+MILS	Military Science
+MIP	Molecular and Integrative Physiology
+MSE	Materials Science and Engineering
+MUS	Music
+MUSE	Museum Studies
+NEUR	Neuroscience
+NPRE	Nuclear, Plasma, and Radiological Engineering
+NRES	Natural Resources and Environmental Sciences
+NS	Naval Science
+NUTR	Nutritional Sciences
+PATH	Pathobiology
+PBIO	Plant Biology
+PERS	Persian
+PHIL	Philosophy
+PHYS	Physics
+PLPA	Plant Pathology
+POL	Polish
+PORT	Portuguese
+PS	Political Science
+PSM	Professional Science Master's Program
+PSYC	Psychology
+REES	Russian, East European and Eurasian Studies
+REHB	Rehabilitation Counseling
+REL	Religion
+RHET	Rhetoric and Composition
+RSOC	Rural Sociology
+RST	Recreation, Sport, and Tourism
+RUSS	Russian
+SAME	South Asian and Middle Eastern Studies
+SBC	Strategic Brand Communication
+SCAN	Scandinavian
+SE	Systems Engineering and Design
+SHS	Speech and Hearing Science
+SLAV	Slavic
+SLCL	Literatures, Cultures, and Linguistics
+SLS	Second Language Studies
+SOC	Sociology
+SOCW	Social Work
+SPAN	Spanish
+SPED	Special Education
+STAT	Statistics
+SWAH	Swahili
+TAM	Theoretical and Applied Mechanics
+TE	Technology Entrepreneurship
+THEA	Theatre
+TMGT	Technology and Management Courses
+TRST	Translation Studies
+TSM	Technical Systems Management
+TURK	Turkish
+UKR	Ukrainian
+UP	Urban and Regional Planning
+VCM	Veterinary Clinical Medicine
+VM	Veterinary Medicine Courses
+WLOF	Wolof
+WRIT	Writing Studies
+YDSH	Yiddish
+\.
+
+
+--
+-- Data for Name: transaction; Type: TABLE DATA; Schema: uiuc; Owner: fd
+--
+
+COPY uiuc.transaction (tid, sell_time, condition, post_time, price, buyerid, sellerid, isbn, img_url) FROM stdin;
+2	2018-03-26 04:54:21.06398	New	2018-01-01 06:14:00	$19.98	vivianh2	chenq2	9780824821524	\N
+4	2018-03-26 05:07:27.611065	Acceptable	2017-11-11 11:59:00	$174.25	chenq2	haonan3	9780824821524	\N
+5	2018-03-21 10:59:00	Like New	2018-02-21 10:59:00	$13.66	flyu2	chenq2	9780679752691	\N
+11	\N	New	2018-03-26 19:09:00.396128	$49.32	\N	vivianh2	9780262529099	\N
+12	\N	Like New	2018-03-26 19:09:11.22912	$66.00	\N	vivianh2	9780134701332	\N
+16	\N	Good	2018-04-02 21:25:46.98184	$0.00	\N	flyu2	             	\N
+17	\N	Good	2018-04-02 21:26:07.991095	$123.00	\N	flyu2	sadad        	\N
+18	\N	Like New	2018-04-10 20:55:00.722114	$555.00	\N	flyu2	555          	https://res.cloudinary.com/readmeagain/image/upload/v1523411695/readmeagain/mypic_hifwjg.jpg
+19	\N	New	2018-04-10 21:17:18.21663	$66.00	\N	flyu2	666          	
+20	\N	New	2018-04-10 21:17:54.753416	$4.00	\N	\N	4            	
+21	\N	Like New	2018-04-10 23:09:26.023802	$3.00	\N	flyu2	asd          	
+22	\N	New	2018-04-10 23:10:08.90688	$2.00	\N	\N	2            	
+\.
+
+
+--
+-- Data for Name: user; Type: TABLE DATA; Schema: uiuc; Owner: fd
+--
+
+COPY uiuc."user" (netid, rating, uname) FROM stdin;
+chenq2	5	\N
+vivianh2	1.69999999999999996	\N
+haonan3	4.29999999999999982	\N
+flyu2	3	\N
+\.
+
+
+--
+-- Name: transaction_tid_seq; Type: SEQUENCE SET; Schema: uiuc; Owner: fd
+--
+
+SELECT pg_catalog.setval('uiuc.transaction_tid_seq', 22, true);
+
+
+--
+-- Name: book book_pkey; Type: CONSTRAINT; Schema: uiuc; Owner: fd
+--
+
+ALTER TABLE ONLY uiuc.book
+    ADD CONSTRAINT book_pkey PRIMARY KEY (isbn);
+
+
+--
+-- Name: dept dept_pkey; Type: CONSTRAINT; Schema: uiuc; Owner: fd
+--
+
+ALTER TABLE ONLY uiuc.dept
+    ADD CONSTRAINT dept_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: class subject_number; Type: CONSTRAINT; Schema: uiuc; Owner: fd
+--
+
+ALTER TABLE ONLY uiuc.class
+    ADD CONSTRAINT subject_number PRIMARY KEY (subject, number);
+
+
+--
+-- Name: transaction transaction_pkey; Type: CONSTRAINT; Schema: uiuc; Owner: fd
+--
+
+ALTER TABLE ONLY uiuc.transaction
+    ADD CONSTRAINT transaction_pkey PRIMARY KEY (tid);
+
+
+--
+-- Name: user user_pkey; Type: CONSTRAINT; Schema: uiuc; Owner: fd
+--
+
+ALTER TABLE ONLY uiuc."user"
+    ADD CONSTRAINT user_pkey PRIMARY KEY (netid);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
