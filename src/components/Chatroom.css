@@ -91,9 +91,10 @@
   cursor: pointer;
   transition: all 0.3s ease;
   margin-right: 1em;
+  color: #fff;
 }
 
 .chatroom .input input[type="submit"]:hover {
-  background: #2196F3;
-  color: #FFF;
+  background: #FFF;
+  color: #000;
 }
