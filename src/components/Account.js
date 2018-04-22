@@ -171,14 +171,14 @@ class Account extends Component {
 
                 <ReactEcharts
                   option={this.state.option_sold}
-                  style={{ height: '400px' }}
+                  style={{ height: '300px' }}
                   opts={{ renderer: 'svg' }} // use svg to render the chart.
                 />
 
 
                 <ReactEcharts
                   option={this.state.option_bought}
-                  style={{ height: '400px', padding: '25px' }}
+                  style={{ height: '300px', padding: '25px' }}
                   opts={{ renderer: 'svg' }} // use svg to render the chart.
                 />
 

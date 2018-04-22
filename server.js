@@ -493,7 +493,7 @@ app.get("/api/sold", (req, res) => {
             itemStyle: {
               normal: {
                 color: '#2196F3',
-                shadowBlur: 150,
+                shadowBlur: 0,
                 shadowColor: 'rgba(0, 0, 0, 0.5)'
               }
             },
@@ -575,7 +575,7 @@ app.get("/api/bought", (req, res) => {
             itemStyle: {
               normal: {
                 color: '#2196F3',
-                shadowBlur: 150,
+                shadowBlur: 0,
                 shadowColor: 'rgba(0, 0, 0, 0.5)'
               }
             },

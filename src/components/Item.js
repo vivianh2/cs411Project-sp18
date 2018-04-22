@@ -15,6 +15,8 @@ import Divider from 'material-ui/Divider';
 import Snackbar from 'material-ui/Snackbar';
 import Email from 'material-ui-icons/Email';
 
+
+
 const isbn = require('node-isbn');
 
 const styles = theme => ({
@@ -226,9 +228,10 @@ class Item extends Component {
           </List>
         </Collapse>
         <Button color="primary" onClick={this.handleEmail}>
-          <Email className={classes.leftIcon, classes.iconSmall}/>
+          <Email className={classes.leftIco, classes.iconSmall}/>
           Email Me when new book get posted
         </Button>
+
       </div>
     );
   }
