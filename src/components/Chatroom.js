@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from 'react-dom';
-import './App.css';
+import './Chatroom.css';
 
 import Message from './Message.js';
 
@@ -52,7 +52,7 @@ class Chatroom extends Component {
 
         this.setState({
             chats: this.state.chats.concat([{
-                username: "Kevin Hsu",
+                username: this.props.netid,
                 content: <p>{ReactDOM.findDOMNode(this.refs.msg).value}</p>,
                 img: "http://i.imgur.com/Tj5DGiO.jpg",
             }])
@@ -62,12 +62,12 @@ class Chatroom extends Component {
     }
 
     render() {
-        const username = "Kevin Hsu";
+        const username = this.props.netid;
         const { chats } = this.state;
 
         return (
             <div className="chatroom">
-                <h3>Chilltime</h3>
+              <h1>Chilltime</h1>
                 <ul className="chats" ref="chats">
                     {
                         chats.map((chat) =>

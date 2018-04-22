@@ -1,0 +1,99 @@
+.chatroom {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 0 8px 0 rgba(0,0,0, 0.3);
+}
+
+.chatroom h1 {
+  background-color: #2196F3;
+  color: #FFF;
+  margin: 0;
+  height: 40px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatroom .chats {
+  box-sizing: border-box;
+  padding: 0 20px;
+  margin: 10px 0 0;
+  height: 36em;
+  overflow-y: scroll;
+}
+
+.chatroom .chats .chat {
+  position: relative;
+  padding: 5px 13px;
+  font-size: 1em;
+  border-radius: 10px;
+  list-style: none;
+  float: left;
+  clear: both;
+  margin: 10px 0;
+  max-width: 20em;
+  border: 1px solid #64B5F6;
+}
+
+.chatroom .chats .chat img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  position: absolute;
+  top: -10px;
+  left: 0px;
+}
+
+.chatroom .chats .chat.right {
+  float: right;
+  clear: both;
+  background-color: #64B5F6;
+}
+
+.chatroom .chats .chat a {
+  text-decoration: none;
+  color:#2196F3;
+}
+
+.chatroom .input {
+  height: 40px;
+  width: 100%;
+  background: #2196F3;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.chatroom .input input[type="text"] {
+  background: rgba(255, 255, 255, 0.5);
+  outline: 0;
+  border: 2px solid #64B5F6;
+  padding: 0 5px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  height: 30px;
+  margin-left: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chatroom .input input[type="submit"] {
+  background: transparent;
+  border: 1px solid #64B5F6;
+  height: 30px;
+  width: 70px;
+  box-sizing: border-box;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 1em;
+}
+
+.chatroom .input input[type="submit"]:hover {
+  background: #2196F3;
+  color: #FFF;
+}
