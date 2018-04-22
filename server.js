@@ -1,9 +1,11 @@
 const express = require("express");
 const { Client } = require("pg");
+const nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
 const app = express();
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: true,
+  //ssl: true,
 });
 client.connect();
 
@@ -217,5 +219,58 @@ app.post("/api/delete", (req, res) => {
     }
   );
 })
+
+
+
+app.post('/api/email', (req, res) => {
+
+  console.log("name:" + req.body.name);
+  console.log("book:" + req.body.book);
+  const output = `
+    <p>You have a new contact request</p>
+    <h3>Contact Details</h3>
+    <ul>  
+      <li>Seller Name: ${req.body.name}</li>
+      <li>Book: ${req.body.book}</li>
+    </ul>
+  `;
+
+
+var transporter = nodemailer.createTransport(smtpTransport({
+  service: 'gmail',
+  host: 'smtp.gmail.com',
+  auth: {
+    user: 'noreplyreadmeagain@gmail.com',
+    pass: 'whn1234567'
+  }
+}));
+
+transporter.set('oauth2_provision_cb', (user, renew, callback)=>{
+    let accessToken = userTokens[user];
+    if(!accessToken){
+        return callback(new Error('Unknown user'));
+    }else{
+        return callback(null, accessToken);
+    }
+});
+
+  // setup email data with unicode symbols
+  let mailOptions = {
+      from: '"Nodemailer Contact" <whn87177868@gmail.com>', // sender address
+      to: 'whn87177868@gmail.com', // list of receivers
+      subject: 'Node Contact Request', // Subject line
+      text: 'Hello world?', // plain text body
+      html: output // html body
+  };
+
+  // send mail with defined transport object
+  transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+          return console.log(error);
+      }
+      console.log('Message sent: %s', info.messageId);   
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info)); 
+  });
+  });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
