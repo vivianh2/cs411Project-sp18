@@ -32,7 +32,9 @@ class Account extends Component {
     netid: this.props.location.state.netid,
     username: this.props.location.state.username,
     rating: 0,
-    option: {},
+    option_prices: {},
+    option_sold: {},
+    option_bought: {},
     selectedItem: "account",
   };
 
@@ -53,14 +55,30 @@ class Account extends Component {
       )
       .catch(err => console.log(err));
 
-      this.getChartData(this.state.netid)
-      .then(res => {
-        this.setState({
-          option: res.option
-        })
-        console.log("normp is: " + this.state.option_data)
-      }
-      ).catch(err => console.log(err));
+    // this.getPriceChart(this.state.netid)
+    //   .then(res => {
+    //     this.setState({
+    //       option_prices: res.option
+    //     })
+    //     console.log("option_data is: " + this.state.option_data)
+    //   }
+    //   ).catch(err => console.log(err));
+    
+    this.getSoldChart(this.state.netid).then(res => {
+      this.setState({
+        option_sold: res.option
+      })
+      console.log("option_sold is: " + this.state.option_sold)
+    }
+    ).catch(err => console.log(err));
+
+    this.getBoughtChart(this.state.netid).then(res => {
+      this.setState({
+        option_bought: res.option
+      })
+      console.log("option_bought is: " + this.state.option_bought)
+    }
+    ).catch(err => console.log(err));
   }
 
   getAccount = async netid => {
@@ -71,8 +89,25 @@ class Account extends Component {
     return body;
   };
 
-  getChartData = async netid => {
+  getPriceChart = async netid => {
     const response = await fetch("/api/prices");
+    const body = await response.json();
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
+
+
+  getSoldChart = async netid => {
+    //const response = await fetch("/api/sold?id=" + netid);
+    const response = await fetch("/api/sold");
+    const body = await response.json();
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
+
+  getBoughtChart = async netid => {
+    //const response = await fetch("/api/bought?id=" + netid);
+    const response = await fetch("/api/bought");
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
     return body;
@@ -128,11 +163,25 @@ class Account extends Component {
                 </Typography>
                 <Ratings rating={this.state.rating} />
 
-                <ReactEcharts
-                  option={this.state.option}
+                {/* <ReactEcharts
+                  option={this.state.option_prices}
                   style={{ height: '300px' }}
                   opts={{ renderer: 'svg' }} // use svg to render the chart.
+                /> */}
+
+                <ReactEcharts
+                  option={this.state.option_sold}
+                  style={{ height: '400px' }}
+                  opts={{ renderer: 'svg' }} // use svg to render the chart.
                 />
+
+
+                <ReactEcharts
+                  option={this.state.option_bought}
+                  style={{ height: '400px', padding: '25px' }}
+                  opts={{ renderer: 'svg' }} // use svg to render the chart.
+                />
+
 
               </React.Fragment>
             )
