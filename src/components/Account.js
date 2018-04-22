@@ -6,9 +6,11 @@ import { MenuList, MenuItem } from "material-ui/Menu";
 import { ListItemIcon, ListItemText } from "material-ui/List";
 import AccountIcon from "material-ui-icons/AccountCircle";
 import HistoryIcon from "material-ui-icons/History";
+import ChatIcon from "material-ui-icons/Chat";
 
 import Ratings from "./Ratings";
 import History from "./History";
+import Chatroom from "./Chatroom";
 
 const styles = theme => ({
   menuItem: {
@@ -85,6 +87,16 @@ class Account extends Component {
                 primary="History"
               />
             </MenuItem>
+            <MenuItem className={classes.menuItem} value="history" onClick={() => this.menuClick("chatroom")}>
+              <ListItemIcon className={classes.icon}>
+                <ChatIcon />
+              </ListItemIcon>
+              <ListItemText
+                classes={{ primary: classes.primary }}
+                inset
+                primary="Chatroom"
+              />
+            </MenuItem>
           </MenuList>
         </Grid>
         <Grid item md={10}>
@@ -107,6 +119,10 @@ class Account extends Component {
           {
             this.state.selectedItem === "history" &&
               <History netid={this.state.netid} />
+          }
+          {
+            this.state.selectedItem === "chatroom" &&
+              <Chatroom/>
           }
         </Grid>
       </Grid>
