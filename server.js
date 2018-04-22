@@ -24,9 +24,54 @@ client.connect();
 const port = process.env.PORT || 3001;
 
 var netid = null;
+
 app.post("/api/login", (req, res) => {
   netid = req.body.netid;
-  res.sendStatus(200);
+  profile_url = req.body.profile_url;
+
+  const query = {
+    text: "SELECT * FROM uiuc.User WHERE NETID = $1",
+    values: [req.body.netid]
+  };
+
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    console.log(r.rows)
+    if(r.rows.length == 0 || !r.rows[0].profile_url){
+      if(r.rows.length == 0){
+        client.query(
+            "INSERT INTO uiuc.user (netid, profile_url) VALUES($1, $2);",
+            [req.body.netid, req.body.profile_url],
+            (err, r) => {
+              if (err) {
+                throw err;
+              } else {
+                console.log("Insert user done");
+                res.sendStatus(200);
+              }
+            }
+        );
+      }else{
+        client.query(
+            "UPDATE uiuc.user SET profile_url=$1 WHERE netid=$2;",
+            [req.body.profile_url, req.body.netid],
+            (err, r) => {
+              if (err) {
+                throw err;
+              } else {
+                console.log("Insert user done");
+                res.sendStatus(200);
+              }
+            }
+        );
+      }
+    }else{
+      console.log("user ok!");
+      res.sendStatus(200);
+    }
+  });
+
+
 });
 
 app.post("/api/logout", (req, res) => {

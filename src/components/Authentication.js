@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 var pauth = sessionStorage.getItem("auth");
 var pnetid = sessionStorage.getItem("netid");
 var puserName = sessionStorage.getItem("userName");
+var pprofile_url = sessionStorage.getItem("profile_url");
 
 const style = {
   background: "white",
@@ -27,7 +28,8 @@ class Authentication extends Component {
   state = {
     auth: pauth == null ? 0 : pauth, // Yes or no
     netid: pnetid == null ? '' : pnetid, // User netid
-    userName: puserName == null ? '' : puserName
+    userName: puserName == null ? '' : puserName,
+    profile_url: pprofile_url == null ? '' : pprofile_url
   };
 
   constructor(props) {
@@ -40,6 +42,7 @@ class Authentication extends Component {
     sessionStorage.setItem("auth", this.state.auth);
     sessionStorage.setItem("netid", this.state.netid);
     sessionStorage.setItem("userName", this.state.userName);
+    sessionStorage.setItem("profile_url", this.state.profile_url);
   }
 
   postData(url, data) {
@@ -59,20 +62,22 @@ class Authentication extends Component {
   }
 
   async loginResponse(GoogleUser) {
-    var email = GoogleUser.getBasicProfile().getEmail();
+    var email = GoogleUser.getBasicProfile().getEmail();  //getImageUrl()
     var isStudent = email.endsWith("@illinois.edu");
     if (isStudent) {
       var atIndex = email.indexOf("@");
       var netid = email.substring(0, atIndex);
       var userName = GoogleUser.getBasicProfile().getName();
+      var profile_url = GoogleUser.getBasicProfile().getImageUrl();
       this.setState({
         netid: netid,
         userName: userName,
-        auth: 1
+        auth: 1,
+        profile_url: profile_url
       });
       this.storeState();
 
-      this.postData('/api/login', {netid: netid})
+      this.postData('/api/login', {netid: netid, profile_url: profile_url})
         .catch(error => console.error(error));
     } else {
       alert("Please use UIUC email~");
@@ -83,7 +88,8 @@ class Authentication extends Component {
     this.setState({
       netid: '',
       userName: '',
-      auth: 0
+      auth: 0,
+      profile_url: ''
     });
     this.storeState();
     alert("Logged out! We'll miss you~");
