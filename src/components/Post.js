@@ -5,6 +5,11 @@ import MenuItem from 'material-ui/Menu/MenuItem';
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
+import Dropzone from 'react-dropzone';
+import request from 'superagent';
+
+const CLOUDINARY_UPLOAD_PRESET = 'readmeagain';
+const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/readmeagain/upload';
 
 const styles = theme => ({
   container: {
@@ -44,11 +49,9 @@ class Post extends React.Component {
     price: '',
     contact: '',
     currency: '',
+    uploadedFile: null,
+    uploadedFileCloudinaryUrl: ''
   };
-  constructor(props) {
-    super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
 
   postData(url, data) {
     // Default options are marked with *
@@ -72,23 +75,53 @@ class Post extends React.Component {
     });
   };
 
-  handleSubmit(event) {
-    console.log(this.state);
-    this.postData('/api/create', {
-      isbn: this.state.isbn,
-      condition: this.state.condition,
-      price: this.state.price,
-      contact: this.state.contact,
-      currency: this.state.currency
-    })
-      .then(response => {
-        if (response.ok){
-          alert("Your post has been received.");
-        } else {
-          alert(response.status + " " + response.statusText);
-        }
-      })
+  handleSubmit = event => {
     event.preventDefault();
+    // check required fields
+    if(this.state.isbn === "" || this.state.condition === "" || this.state.price === ""
+    || this.state.contact === "" || this.state.currency === "" || this.state.uploadedFileCloudinaryUrl === ""){
+      alert("Please fill all the entries");
+      return;
+    }else{
+      this.postData('/api/create', {
+        isbn: this.state.isbn,
+        condition: this.state.condition,
+        price: this.state.price,
+        contact: this.state.contact,
+        currency: this.state.currency,
+        img_url: this.state.uploadedFileCloudinaryUrl
+      })
+        .then(response => {
+          if (response.ok){
+            alert("Your post has been received.");
+          } else {
+            alert(response.status + " " + response.statusText);
+          }
+        })
+    }
+
+  }
+
+  onImageDrop = (files) => {
+    this.setState({
+      uploadedFile: files[0]
+    });
+
+    let upload = request.post(CLOUDINARY_UPLOAD_URL)
+                     .field('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+                     .field('file', files[0]);
+    upload.end((err, response) => {
+      if (err) {
+        console.error(err);
+      }
+
+      if (response.body.secure_url !== '') {
+        this.setState({
+          uploadedFileCloudinaryUrl: response.body.secure_url   // 我感觉是这里出了问题?????
+        });
+      }
+    });
+
   }
 
   render() {
@@ -175,19 +208,24 @@ class Post extends React.Component {
           }}
         />
         <Grid container justify='flex-end'>
-          <label>
-            <Button component="span" className={classes.button}>
-              Upload product image
-            </Button>
-            <input
-              accept="image/*"
-              type="file"
-              style={{display: 'none'}}
-              ref={input => {
-                this.fileInput = input;
-              }}
-            />
-          </label>
+
+            <div className="FileUpload">
+              <Dropzone
+                onDrop={this.onImageDrop}
+                multiple={false}
+                accept="image/*">
+                <div>Drop an image or click to select a file to upload.{this.state.uploadedFileCloudinaryUrl}</div>
+              </Dropzone>
+            </div>
+
+            <div>
+              {this.state.uploadedFileCloudinaryUrl === '' ? null :
+              <div>
+                <p>{this.state.uploadedFile.name}</p>
+                <img src={this.state.uploadedFileCloudinaryUrl} alt="" />
+              </div>}
+            </div>
+
           <Button variant="raised" color="primary" className={classes.button} type="submit" value="submit">
             Confirm
           </Button>

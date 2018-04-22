@@ -3,18 +3,23 @@ const { Client } = require("pg");
 const nodemailer = require("nodemailer");
 var smtpTransport = require("nodemailer-smtp-transport");
 const app = express();
-const client = new Client({
-  connectionString: process.env.DATABASE_URL
-  //ssl: true,
-});
-client.connect();
+let client;
 
 app.use(express.json()); // to support JSON-encoded bodies
 app.use(express.urlencoded({ extended: true })); // to support URL-encoded bodies
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("build"));
+  client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: true,
+  });
+} else{
+  client = new Client({
+    connectionString: process.env.DATABASE_URL,
+  });
 }
+client.connect();
 
 const port = process.env.PORT || 3001;
 
@@ -45,14 +50,16 @@ app.get("/api/account", (req, res) => {
 app.get("/api/suggestions", (req, res) => {
   const query = {
     text:
-      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT unnest(isbn_list) AS col FROM uiuc.Class",
+      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction",
     rowMode: "array"
   };
+
 
   client.query(query, (err, r) => {
     if (err) throw err;
     res.send({ suggestions: [].concat.apply([], r.rows) });
   });
+
 });
 
 app.get("/api/search", (req, res) => {
@@ -61,7 +68,7 @@ app.get("/api/search", (req, res) => {
   if (isNaN(req.query.q)) {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN " +
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
         "FROM uiuc.Transaction " +
         "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
       values: req.query.q.split(" ")
@@ -69,15 +76,18 @@ app.get("/api/search", (req, res) => {
   } else {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN " +
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
         "FROM uiuc.Transaction " +
         "WHERE ISBN = $1",
       values: [req.query.q]
     };
   }
 
+
   client.query(query, (err, r) => {
+    console.log(err);
     if (err) throw err;
+
     let books = [];
     let posts = [];
 
@@ -106,59 +116,42 @@ app.get("/api/history", (req, res) => {
   console.log("History " + req.query.id);
   const query = {
     text:
-      "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time " +
-      "FROM uiuc.transaction t, uiuc.book b, uiuc.user u " +
-      "WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid",
+      "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time, t.price \
+       FROM uiuc.transaction t, uiuc.book b, uiuc.user u \
+       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid",
     values: [req.query.id]
   };
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows[0]);
+    console.log(r.rows);
     res.send({ history: r.rows });
   });
 });
 
-app.post("/api/purchase", (req, res) => {
-  var tid = req.body.tid;
-  if (tid != null) {
-    // update database
-    // if the item is sold, do res.sendStatus(555);
-
-    console.log("purchase " + tid);
-    console.log("purchase " + netid);
-    console.log("purchase " + req.body);
-
-    client.query(
-      "SELECT buyerid FROM uiuc.transaction WHERE tid = $1",
-      [tid],
-      (err, r) => {
-        if (r != null) {
-          res.sendStatus(555);
-        } else {
-          client.query(
-            "UPDATE uiuc.transaction SET buyerid = $1 WHERE tid = $2",
-            [netid, tid],
-            (err, r) => {
-              console.log("purchase done");
-            }
-          );
-        }
-      }
-    );
-
-    res.sendStatus(200);
-  } else {
-    // not authorize
-    console.log("purchase " + tid);
-    res.sendStatus(401);
-  }
-});
+app.post("/api/update", (req, res) => {
+  console.log("Update " + req.body.tid)
+  let price = req.body.price.slice(1)
+  console.log(price)
+  console.log(req.body.buyer)
+  const query = {
+    text:
+      "UPDATE uiuc.transaction SET price = $1, buyerid = $2 WHERE tid = $3",
+    values: [price, req.body.buyer, req.body.tid]
+  };
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    res.send({
+      price: req.body.price,
+      buyer: req.body.buyer
+    })
+  });
+})
 
 app.post("/api/received", (req, res) => {
   // update selltime in database
   // and return the timestamp
-  var tid = req.body.tid;
-  var time = new Date().getTime();
+  let tid = req.body.tid;
+  const time = new Date();
 
   client.query(
     "UPDATE uiuc.transaction SET sell_time = $1 WHERE tid = $2",
@@ -169,7 +162,7 @@ app.post("/api/received", (req, res) => {
       } else {
         console.log("update timestamp done");
         res.send({
-          selltime: time
+          sell_time: time
         });
       }
     }
@@ -177,24 +170,28 @@ app.post("/api/received", (req, res) => {
 });
 
 app.post("/api/create", (req, res) => {
-  var isbn = req.body.isbn;
-  var condition = req.body.condition;
-  var price = req.body.price;
+  console.log(req.body);
+    let isbn = req.body.isbn;
+    let condition = req.body.condition;
+    let price = req.body.price;
+    let img_url = req.body.img_url;
 
-  client.query(
-    "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, post_time) VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP);",
-    [isbn, condition, price, netid],
-    (err, r) => {
-      if (err) {
-        throw err;
-      } else {
-        console.log("Insert post done");
-      }
-    }
-  );
-  res.sendStatus(200);
-  //send email when there is a new book be posted.
-  sendEmail(req, res);
+    console.log(img_url)
+
+    client.query(
+        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, img_url, post_time) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
+        [isbn, condition, price, netid, img_url],
+        (err, r) => {
+          if (err) {
+            throw err;
+          } else {
+            console.log("Insert post done");
+            res.sendStatus(200);
+            //send email when there is a new book be posted.
+            sendEmail(req, res);
+          }
+        }
+    );
 });
 
 app.post("/api/delete", (req, res) => {
@@ -367,7 +364,6 @@ app.post("/api/email", (req, res) => {
     }
   );
   console.log("tid: " + netid);
-  //sendEmail(req, res);
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

@@ -14,9 +14,13 @@ import Table, {
 } from "material-ui/Table";
 import IconButton from "material-ui/IconButton";
 import FirstPageIcon from "material-ui-icons/FirstPage";
+import EditIcon from "material-ui-icons/Edit";
+import DeleteIcon from "material-ui-icons/Delete";
 import KeyboardArrowLeft from "material-ui-icons/KeyboardArrowLeft";
 import KeyboardArrowRight from "material-ui-icons/KeyboardArrowRight";
 import LastPageIcon from "material-ui-icons/LastPage";
+import Modal from "material-ui/Modal";
+import TextField from "material-ui/TextField";
 
 const actionsStyles = theme => ({
   root: {
@@ -110,9 +114,6 @@ const styles = theme => ({
     width: "100%",
     backgroundColor: theme.palette.background
   },
-  type: {
-    margin: "1% 2%"
-  },
   table: {
     minWidth: 500
   },
@@ -120,6 +121,16 @@ const styles = theme => ({
     overflowX: "auto",
     width: "95%",
     margin: "0 2.5%"
+  },
+  paper: {
+    width: theme.spacing.unit * 50,
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing.unit * 4,
+    margin: "10% 25%"
+  },
+  update: {
+    float: "right"
   }
 });
 
@@ -127,7 +138,10 @@ class History extends Component {
   state = {
     history: [],
     page: 0,
-    rowsPerPage: 5
+    rowsPerPage: 5,
+    open: false,
+    price: -1,
+    buyer: null
   };
 
   componentDidMount() {
@@ -157,6 +171,28 @@ class History extends Component {
 
   handleChangeRowsPerPage = event => {
     this.setState({ rowsPerPage: event.target.value });
+  };
+
+  handleOpen = (price) => {
+    this.setState({
+      open: true,
+      price: price,
+      buyer: null
+     });
+  };
+
+  handleClose = () => {
+    this.setState({
+      open: false,
+      price: -1,
+      buyer: null
+    });
+  };
+
+  handleChange = name => event => {
+    this.setState({
+      [name]: event.target.value
+    });
   };
 
   postData(url, data) {
@@ -191,7 +227,7 @@ class History extends Component {
     );
   };
 
-  received = id => {
+  delete = id => {
     this.postData("/api/delete", { tid: this.state.history[id].tid }).then(
       response => {
         if (response.ok) {
@@ -205,6 +241,31 @@ class History extends Component {
     );
   };
 
+  update = id => {
+    let that = this;
+    this.postData("/api/update", {
+      tid: this.state.history[id].tid,
+      price: this.state.price,
+      buyer: this.state.buyer
+    }).then(
+      response => {
+        if (response.ok){
+          response.json().then(result => {
+            let history = this.state.history;
+            history[id].price = result.price;
+            history[id].buyerid = result.buyer;
+            this.setState({
+              history: history
+            });
+            that.handleClose();
+          });
+        } else{
+          alert(response.status + " " + response.statusText);
+        }
+      }
+    );
+  };
+
   render() {
     const { classes } = this.props;
     const { history, rowsPerPage, page } = this.state;
@@ -212,11 +273,7 @@ class History extends Component {
       rowsPerPage - Math.min(rowsPerPage, history.length - page * rowsPerPage);
     return (
       <div className={classes.root}>
-        <Typography
-          className={classes.type}
-          variant="subheading"
-          color="inherit"
-        >
+        <Typography variant="headline" color="inherit">
           History
         </Typography>
         <div className={classes.tableWrapper}>
@@ -228,6 +285,7 @@ class History extends Component {
                 <TableCell>Seller</TableCell>
                 <TableCell>Post time</TableCell>
                 <TableCell>Sell time</TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -237,23 +295,12 @@ class History extends Component {
                   return (
                     <TableRow key={n.id}>
                       <TableCell>{n.name}</TableCell>
-                      <TableCell>
-                        {n.buyerid ? n.buyerid : "Not sold yet"}
-                      </TableCell>
+                      <TableCell>{n.buyerid}</TableCell>
                       <TableCell>{n.sellerid}</TableCell>
                       <TableCell>{n.post_time}</TableCell>
                       <TableCell>
-                        {n.sell_time ? (
+                        {n.sell_time || n.sellerid === this.props.netid ? (
                           n.sell_time
-                        ) : n.buyerid ? (
-                          <Button
-                            variant="raised"
-                            color="primary"
-                            className={classes.button}
-                            onClick={() => this.received(n.id)}
-                          >
-                            I've received the item
-                          </Button>
                         ) : (
                           <Button
                             variant="raised"
@@ -261,9 +308,70 @@ class History extends Component {
                             className={classes.button}
                             onClick={() => this.received(n.id)}
                           >
-                            Delete this post
+                            Item received
                           </Button>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          color="primary"
+                          className={classes.button}
+                          aria-label="Edit"
+                          disabled={
+                            !(
+                              n.sellerid === this.props.netid &&
+                              n.buyerid === null
+                            )
+                          }
+                          onClick={() => this.handleOpen(n.price)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <Modal
+                          aria-labelledby="simple-modal-title"
+                          aria-describedby="simple-modal-description"
+                          open={this.state.open}
+                          onClose={this.handleClose}
+                        >
+                          <div className={classes.paper}>
+                            <Typography variant="title" id="modal-title">
+                              Update buyer and/or price information
+                            </Typography>
+                            <TextField
+                              id="buyer"
+                              label="buyer"
+                              placeholder="Enter buyer netid"
+                              className={classes.textField}
+                              margin="normal"
+                              value={this.state.buyer}
+                              onChange={this.handleChange('buyer')}
+                            />
+                            <br />
+                            <TextField
+                              id="price"
+                              label="price"
+                              className={classes.textField}
+                              margin="normal"
+                              value={this.state.price}
+                              onChange={this.handleChange('price')}
+                            />
+                            <br />
+                            <Button color="primary" className={classes.update} onClick={() => this.update(n.id)}>
+                              Update
+                            </Button>
+                          </div>
+                        </Modal>
+                        <IconButton
+                          color="primary"
+                          className={classes.button}
+                          aria-label="Delete"
+                          disabled={
+                            !(n.buyerid === null || n.buyerid === undefined)
+                          }
+                          onClick={() => this.delete(n.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   );
