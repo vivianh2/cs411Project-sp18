@@ -62,6 +62,23 @@ app.get("/api/suggestions", (req, res) => {
 
 });
 
+app.get("/api/chatroom", (req, res) => {
+  console.log("Chatroom " + req.query.id);
+  const query = {
+    text:
+      "SELECT sender, receiver, message\
+       FROM uiuc.Chatroom\
+       WHERE (sender = $1 OR receiver = $1)",
+    values: [req.query.id]
+  };
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    console.log(r.rows);
+    res.send({ chats: r.rows });
+  });
+});
+
+
 app.get("/api/search", (req, res) => {
   console.log("Search " + req.query.q);
   let query;

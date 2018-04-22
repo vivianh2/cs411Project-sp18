@@ -122,7 +122,7 @@ class Account extends Component {
           }
           {
             this.state.selectedItem === "chatroom" &&
-              <Chatroom/>
+              <Chatroom netid={this.state.netid}/>
           }
         </Grid>
       </Grid>

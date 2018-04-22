@@ -57,3 +57,12 @@ INSERT INTO uiuc.Book VALUES('9780385480017','Bird By Bird','https://www.booksto
 UPDATE uiuc.Class SET isbn_list = ('{"9780321964267", "9780134701332", "9780385480017"}') WHERE subject = 'RHET' AND number = 105;
 INSERT INTO uiuc.Transaction VALUES(DEFAULT, CURRENT_TIMESTAMP, 'Acceptable', TO_TIMESTAMP('2017-11-11 11:59:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'), 174.25, 'chenq2', 'haonan3', '9780824821524');
 INSERT INTO uiuc.Transaction VALUES(DEFAULT, TO_TIMESTAMP('2018-03-21 10:59:00.742000000','YYYY-MM-DD HH24:MI:SS.FF'), 'Like New', TO_TIMESTAMP('2018-02-21 10:59:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'), 13.66, 'flyu2', 'chenq2', '9780679752691');
+
+
+
+CREATE TABLE uiuc.chatroom(
+    CID serial PRIMARY KEY,
+    Sender varchar(10),
+    Receiver varchar(10),
+    Message text
+);

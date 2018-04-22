@@ -9,39 +9,7 @@ class Chatroom extends Component {
         super(props);
 
         this.state = {
-            chats: [{
-                username: "Kevin Hsu",
-                content: <p>Hello World!</p>//,
-                //img: "http://i.imgur.com/Tj5DGiO.jpg",
-            }, {
-                username: "Alice Chen",
-                content: <p>Love it! :heart:</p>//,
-                //img: "http://i.imgur.com/Tj5DGiO.jpg",
-            }, {
-                username: "Kevin Hsu",
-                content: <p>Check out my Github at https://github.com/WigoHunter</p>//,
-                //img: "http://i.imgur.com/Tj5DGiO.jpg",
-            }, {
-                username: "KevHs",
-                content: <p>Lorem ipsum dolor sit amet, nibh ipsum. Cum class sem inceptos incidunt sed sed. Tempus wisi enim id, arcu sed lectus aliquam, nulla vitae est bibendum molestie elit risus.</p>//,
-                //img: "http://i.imgur.com/ARbQZix.jpg",
-            }, {
-                username: "Kevin Hsu",
-                content: <p>So</p>//,
-                //img: "http://i.imgur.com/Tj5DGiO.jpg",
-            }, {
-                username: "Kevin Hsu",
-                content: <p>Chilltime is going to be an app for you to view videos with friends</p>//,
-                //img: "http://i.imgur.com/Tj5DGiO.jpg",
-            }, {
-                username: "Kevin Hsu",
-                content: <p>You can sign-up now to try out our private beta!</p>//,
-                //img: "http://i.imgur.com/Tj5DGiO.jpg",
-            }, {
-                username: "Alice Chen",
-                content: <p>Definitely! Sounds great!</p>//,
-                //img: "http://i.imgur.com/Tj5DGiO.jpg",
-            }]
+            chats: []
         };
 
         this.submitMessage = this.submitMessage.bind(this);
@@ -49,7 +17,27 @@ class Chatroom extends Component {
 
     componentDidMount() {
         this.scrollToBot();
+
+        this.getChatroom(this.props.netid)
+          .then(res =>
+            this.setState({
+              chats: res.chats.map((chat) => {
+                chat.username = chat.sender;
+                chat.content = <p>{chat.message}</p>;
+                return chat;
+              })
+            })
+          )
+          .catch(err => console.log(err));
     }
+
+    getChatroom = async netid => {
+        const response = await fetch("/api/chatroom?id=" + netid);
+        const body = await response.json();
+
+        if (response.status !== 200) throw Error(body.message);
+        return body;
+    };
 
     componentDidUpdate() {
         this.scrollToBot();
