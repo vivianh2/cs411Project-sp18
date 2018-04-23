@@ -82,8 +82,9 @@ class Post extends React.Component {
     || this.state.contact === "" || this.state.currency === "" || this.state.uploadedFileCloudinaryUrl === ""){
       alert("Please fill all the entries");
       return;
-    }else{
-      console.log(this.state);
+    } else if (this.state.isbn.length != 10 || this.state.isbn.length != 13){
+      alert("ISBN length incorrect";)
+    } else{
       this.postData('/api/create', {
         isbn: this.state.isbn,
         condition: this.state.condition,
