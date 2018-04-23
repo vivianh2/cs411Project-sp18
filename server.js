@@ -12,11 +12,11 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static("build"));
   client = new Client({
     connectionString: process.env.DATABASE_URL,
-    ssl: true,
+    ssl: true
   });
 } else {
   client = new Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL
   });
 }
 client.connect();
@@ -36,42 +36,40 @@ app.post("/api/login", (req, res) => {
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows)
-    if(r.rows.length == 0 || !r.rows[0].profile_url){
-      if(r.rows.length == 0){
+    console.log(r.rows);
+    if (r.rows.length == 0 || !r.rows[0].profile_url) {
+      if (r.rows.length == 0) {
         client.query(
-            "INSERT INTO uiuc.user (netid, profile_url) VALUES($1, $2);",
-            [req.body.netid, req.body.profile_url],
-            (err, r) => {
-              if (err) {
-                throw err;
-              } else {
-                console.log("Insert user done");
-                res.sendStatus(200);
-              }
+          "INSERT INTO uiuc.user (netid, profile_url) VALUES($1, $2);",
+          [req.body.netid, req.body.profile_url],
+          (err, r) => {
+            if (err) {
+              throw err;
+            } else {
+              console.log("Insert user done");
+              res.sendStatus(200);
             }
+          }
         );
-      }else{
+      } else {
         client.query(
-            "UPDATE uiuc.user SET profile_url=$1 WHERE netid=$2;",
-            [req.body.profile_url, req.body.netid],
-            (err, r) => {
-              if (err) {
-                throw err;
-              } else {
-                console.log("Insert user done");
-                res.sendStatus(200);
-              }
+          "UPDATE uiuc.user SET profile_url=$1 WHERE netid=$2;",
+          [req.body.profile_url, req.body.netid],
+          (err, r) => {
+            if (err) {
+              throw err;
+            } else {
+              console.log("Insert user done");
+              res.sendStatus(200);
             }
+          }
         );
       }
-    }else{
+    } else {
       console.log("user ok!");
       res.sendStatus(200);
     }
   });
-
-
 });
 
 app.post("/api/logout", (req, res) => {
@@ -99,12 +97,10 @@ app.get("/api/suggestions", (req, res) => {
     rowMode: "array"
   };
 
-
   client.query(query, (err, r) => {
     if (err) throw err;
     res.send({ suggestions: [].concat.apply([], r.rows) });
   });
-
 });
 
 app.get("/api/search", (req, res) => {
@@ -128,7 +124,6 @@ app.get("/api/search", (req, res) => {
     };
   }
 
-
   client.query(query, (err, r) => {
     console.log(err);
     if (err) throw err;
@@ -136,8 +131,8 @@ app.get("/api/search", (req, res) => {
     let books = [];
     let posts = [];
 
-    var groupBy = function (xs, key) {
-      return xs.reduce(function (rv, x) {
+    var groupBy = function(xs, key) {
+      return xs.reduce(function(rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(x);
         return rv;
       }, {});
@@ -174,13 +169,12 @@ app.get("/api/history", (req, res) => {
 });
 
 app.post("/api/update", (req, res) => {
-  console.log("Update " + req.body.tid)
-  let price = req.body.price.slice(1)
-  console.log(price)
-  console.log(req.body.buyer)
+  console.log("Update " + req.body.tid);
+  let price = req.body.price.slice(1);
+  console.log(price);
+  console.log(req.body.buyer);
   const query = {
-    text:
-      "UPDATE uiuc.transaction SET price = $1, buyerid = $2 WHERE tid = $3",
+    text: "UPDATE uiuc.transaction SET price = $1, buyerid = $2 WHERE tid = $3",
     values: [price, req.body.buyer, req.body.tid]
   };
   client.query(query, (err, r) => {
@@ -188,9 +182,9 @@ app.post("/api/update", (req, res) => {
     res.send({
       price: req.body.price,
       buyer: req.body.buyer
-    })
+    });
   });
-})
+});
 
 app.post("/api/received", (req, res) => {
   // update selltime in database
@@ -221,7 +215,7 @@ app.post("/api/create", (req, res) => {
   let price = req.body.price;
   let img_url = req.body.img_url;
 
-  console.log(img_url)
+  console.log(img_url);
 
   client.query(
     "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, img_url, post_time) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
@@ -320,7 +314,7 @@ function sendEmail(req, res) {
   getBookName(req, res, function(bookName) {
     getMailList(req, res, function(mailArray) {
       deleteMailList(req, res, function(delete_) {
-        if (!mailArray || mailArray.length === 0){
+        if (!mailArray || mailArray.length === 0) {
           return;
         }
         for (let i = 0; i < mailArray.length - 1; i++) {
@@ -391,7 +385,7 @@ app.post("/api/email", (req, res) => {
   //add the netid to transaction, how to write this sql? this is a array!
   let isbn = req.body.isbn;
   if (netid === null) {
-    res.send(401)
+    res.send(401);
     return;
   }
   let id = "{" + netid + "}";
@@ -411,8 +405,6 @@ app.post("/api/email", (req, res) => {
   console.log("tid: " + netid);
 });
 
-
-
 app.get("/api/prices", (req, res) => {
   let normp = [];
   //let posts = [];
@@ -428,16 +420,13 @@ app.get("/api/prices", (req, res) => {
       (SELECT ta.price pri, ta.isbn isbn, ta.post_time from uiuc.transaction AS ta) AS groupStat \
       GROUP BY groupStat.isbn) AS h WHERE h.isbn=uiuc.transaction.isbn ORDER BY post_time",
     values: []
-  }
+  };
   client.query(query, (err, r) => {
-
-
-    var groupBy = function (xs, key) {
-
+    var groupBy = function(xs, key) {
       if (err) throw err;
       //console.log(r.rows);
 
-      return xs.reduce(function (rv, x) {
+      return xs.reduce(function(rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(parseFloat(x));
         return rv;
       }, {});
@@ -451,191 +440,124 @@ app.get("/api/prices", (req, res) => {
         title: {
           show: true,
           text: "Book Index",
-          left: '40%'
+          left: "40%"
         },
         xAxis: {
-          type: 'category',
+          type: "category",
           data: [],
           name: "Relative Time",
-          left: '40%'
+          left: "40%"
         },
         yAxis: {
-          type: 'value',
+          type: "value",
           name: "Relative Price"
         },
-        series: [{
-          data: Object.keys(normp_array),
-          type: 'line'
-        }]
+        series: [
+          {
+            data: Object.keys(normp_array),
+            type: "line"
+          }
+        ]
       }
     });
-  }
-  )
-})
-
+  });
+});
 
 app.get("/api/sold", (req, res) => {
   const query = {
-    text: "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE sellerid = $1 AND buyerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
-    
-    values: [netid]//values: [req.query.id]
+    text:
+      "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE sellerid = $1 AND buyerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
+
+    values: [netid] //values: [req.query.id]
   };
 
   client.query(query, (err, r) => {
-    console.log(Object.keys(r.rows))
+    console.log(r.rows);
+    if (r.rows.length == 0) {
+      r.rows = [{ value: "1", name: "Nothing here yet" }];
+    }
     res.send({
       option: {
-        backgroundColor: '#FAFAFA',
-
         title: {
-          text: 'Sold Book',
-          left: 'center',
-          top: 20,
-          textStyle: {
-            color: '#000000'
-          }
+          text: "Books that you've sold",
+          x: "center"
         },
-
         tooltip: {
-          trigger: 'item',
+          trigger: "item",
           formatter: "{a} <br/>{b} : {c} ({d}%)"
         },
-
-        visualMap: {
-          show: false,
-          min: 0,
-          max: 6,
-          inRange: {
-            colorLightness: [0.1, 1]
-          }
+        legend: {
+          orient: "vertical",
+          left: "left",
+          data: []
         },
         series: [
           {
-            name: 'Book',
-            type: 'pie',
-            radius: '55%',
-            center: ['50%', '50%'],
-            data: r.rows
-            .sort(function (a, b) { return a.value - b.value; }),
-            roseType: 'radius',
-            label: {
-              normal: {
-                textStyle: {
-                  color: 'rgba(10, 10, 10, 0.5)'
-                }
-              }
-            },
-            labelLine: {
-              normal: {
-                lineStyle: {
-                  color: 'rgba(10, 10, 10, 0.5)'
-                },
-                smooth: 0.2,
-                length: 10,
-                length2: 20
-              }
-            },
+            name: "Book:",
+            type: "pie",
+            radius: "55%",
+            center: ["50%", "60%"],
+            data: r.rows,
             itemStyle: {
-              normal: {
-                color: '#2196F3',
-                shadowBlur: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              emphasis: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: "rgba(0, 0, 0, 0.5)"
               }
-            },
-
-            animationType: 'scale',
-            animationEasing: 'elasticOut',
-            animationDelay: function (idx) {
-              return Math.random() * 200;
             }
           }
         ]
       }
-     });
-  }
-)
-})
-
+    });
+  });
+});
 
 app.get("/api/bought", (req, res) => {
   const query = {
-    text: "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE buyerid = $1 AND sellerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
-    values: [netid]//values: [req.query.id]
+    text:
+      "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE buyerid = $1 AND sellerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
+    values: [netid] //values: [req.query.id]
   };
 
   client.query(query, (err, r) => {
-    console.log(Object.keys(r.rows))
+    console.log(r.rows);
+    if (r.rows.length == 0) {
+      r.rows = [{ value: "1", name: "Nothing here yet" }];
+    }
     res.send({
       option: {
-        backgroundColor: '#FAFAFA',
-
         title: {
-          text: 'Bought Book',
-          left: 'center',
-          top: 0,
-          textStyle: {
-            color: '#000000'
-          }
+          text: "Books that you've purchased",
+          x: "center"
         },
-
         tooltip: {
-          trigger: 'item',
+          trigger: "item",
           formatter: "{a} <br/>{b} : {c} ({d}%)"
         },
-
-        visualMap: {
-          show: false,
-          min: 0,
-          max: 6,
-          inRange: {
-            colorLightness: [0.1, 1]
-          }
+        legend: {
+          orient: "vertical",
+          left: "left",
+          data: []
         },
         series: [
           {
-            name: 'book',
-            type: 'pie',
-            radius: '55%',
-            center: ['50%', '50%'],
-            data: r.rows
-            .sort(function (a, b) { return a.value - b.value; }),
-            roseType: 'radius',
-            label: {
-              normal: {
-                textStyle: {
-                  color: 'rgba(10, 10, 10, 0.5)'
-                }
-              }
-            },
-            labelLine: {
-              normal: {
-                lineStyle: {
-                  color: 'rgba(10, 10, 10, 0.5)'
-                },
-                smooth: 0.2,
-                length: 10,
-                length2: 20
-              }
-            },
+            name: "Book:",
+            type: "pie",
+            radius: "55%",
+            center: ["50%", "60%"],
+            data: r.rows,
             itemStyle: {
-              normal: {
-                color: '#2196F3',
-                shadowBlur: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              emphasis: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: "rgba(0, 0, 0, 0.5)"
               }
-            },
-
-            animationType: 'scale',
-            animationEasing: 'elasticOut',
-            animationDelay: function (idx) {
-              return Math.random() * 200;
             }
           }
         ]
       }
-     });
-  }
-)
-})
+    });
+  });
+});
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
