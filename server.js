@@ -12,11 +12,11 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static("build"));
   client = new Client({
     connectionString: process.env.DATABASE_URL,
-    ssl: true,
+    ssl: true
   });
 } else {
   client = new Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL
   });
 }
 client.connect();
@@ -36,42 +36,40 @@ app.post("/api/login", (req, res) => {
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows)
-    if(r.rows.length == 0 || !r.rows[0].profile_url){
-      if(r.rows.length == 0){
+    console.log(r.rows);
+    if (r.rows.length == 0 || !r.rows[0].profile_url) {
+      if (r.rows.length == 0) {
         client.query(
-            "INSERT INTO uiuc.user (netid, profile_url) VALUES($1, $2);",
-            [req.body.netid, req.body.profile_url],
-            (err, r) => {
-              if (err) {
-                throw err;
-              } else {
-                console.log("Insert user done");
-                res.sendStatus(200);
-              }
+          "INSERT INTO uiuc.user (netid, profile_url) VALUES($1, $2);",
+          [req.body.netid, req.body.profile_url],
+          (err, r) => {
+            if (err) {
+              throw err;
+            } else {
+              console.log("Insert user done");
+              res.sendStatus(200);
             }
+          }
         );
-      }else{
+      } else {
         client.query(
-            "UPDATE uiuc.user SET profile_url=$1 WHERE netid=$2;",
-            [req.body.profile_url, req.body.netid],
-            (err, r) => {
-              if (err) {
-                throw err;
-              } else {
-                console.log("Insert user done");
-                res.sendStatus(200);
-              }
+          "UPDATE uiuc.user SET profile_url=$1 WHERE netid=$2;",
+          [req.body.profile_url, req.body.netid],
+          (err, r) => {
+            if (err) {
+              throw err;
+            } else {
+              console.log("Insert user done");
+              res.sendStatus(200);
             }
+          }
         );
       }
-    }else{
+    } else {
       console.log("user ok!");
       res.sendStatus(200);
     }
   });
-
-
 });
 
 app.post("/api/logout", (req, res) => {
@@ -95,59 +93,76 @@ app.get("/api/account", (req, res) => {
 app.get("/api/suggestions", (req, res) => {
   const query = {
     text:
-      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction",
+      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction UNION SELECT DISTINCT name AS col FROM uiuc.book",
     rowMode: "array"
   };
-
 
   client.query(query, (err, r) => {
     if (err) throw err;
     res.send({ suggestions: [].concat.apply([], r.rows) });
   });
-
 });
+
+var groupBy = function(xs, key) {
+  return xs.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
 
 app.get("/api/search", (req, res) => {
   console.log("Search " + req.query.q);
   let query;
   if (isNaN(req.query.q)) {
-    query = {
-      text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
-        "FROM uiuc.Transaction " +
-        "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
-      values: req.query.q.split(" ")
-    };
+    if (isNaN(parseFloat(req.query.q.split(" ")[1])) == true) {
+      query = {
+        text:
+          "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
+             FROM uiuc.Transaction \
+             WHERE ISBN IN (SELECT isbn FROM uiuc.book WHERE name = $1) \
+           UNION SELECT null, null, null, null, ISBN, null \
+             FROM uiuc.book WHERE name = $1",
+        values: [req.query.q]
+      };
+    } else {
+      query = {
+        text:
+          "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
+             FROM uiuc.Transaction \
+             WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2) \
+               AND BuyerId IS NULL \
+           UNION SELECT null, null, null, null, isbn, null \
+             FROM (SELECT unnest(isbn_list) as isbn from uiuc.Class \
+             WHERE Subject = $1 and Number = $2) as isbn_all",
+        values: req.query.q.split(" ")
+      };
+    }
   } else {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
-        "FROM uiuc.Transaction " +
-        "WHERE ISBN = $1",
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
+           FROM uiuc.Transaction \
+           WHERE ISBN = $1 \
+             AND BuyerId IS NULL \
+         UNION SELECT null, null, null, null, $1, null",
       values: [req.query.q]
     };
   }
 
-
   client.query(query, (err, r) => {
-    console.log(err);
     if (err) throw err;
 
     let books = [];
     let posts = [];
 
-    var groupBy = function (xs, key) {
-      return xs.reduce(function (rv, x) {
-        (rv[x[key]] = rv[x[key]] || []).push(x);
-        return rv;
-      }, {});
-    };
-
     let isbn_transaction = groupBy(r.rows, "isbn");
+    console.log(isbn_transaction);
 
     for (let isbn in isbn_transaction) {
       books.push({ isbn: isbn });
-      posts.push(isbn_transaction[isbn]);
+      posts.push(
+        isbn_transaction[isbn].slice(0, isbn_transaction[isbn].length - 1)
+      );
     }
 
     res.send({
@@ -163,7 +178,8 @@ app.get("/api/history", (req, res) => {
     text:
       "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time, t.price \
        FROM uiuc.transaction t, uiuc.book b, uiuc.user u \
-       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid",
+       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid\
+       ORDER BY t.post_time DESC",
     values: [req.query.id]
   };
   client.query(query, (err, r) => {
@@ -174,13 +190,12 @@ app.get("/api/history", (req, res) => {
 });
 
 app.post("/api/update", (req, res) => {
-  console.log("Update " + req.body.tid)
-  let price = req.body.price.slice(1)
-  console.log(price)
-  console.log(req.body.buyer)
+  console.log("Update " + req.body.tid);
+  let price = req.body.price.slice(1);
+  console.log(price);
+  console.log(req.body.buyer);
   const query = {
-    text:
-      "UPDATE uiuc.transaction SET price = $1, buyerid = $2 WHERE tid = $3",
+    text: "UPDATE uiuc.transaction SET price = $1, buyerid = $2 WHERE tid = $3",
     values: [price, req.body.buyer, req.body.tid]
   };
   client.query(query, (err, r) => {
@@ -188,9 +203,9 @@ app.post("/api/update", (req, res) => {
     res.send({
       price: req.body.price,
       buyer: req.body.buyer
-    })
+    });
   });
-})
+});
 
 app.post("/api/received", (req, res) => {
   // update selltime in database
@@ -221,7 +236,7 @@ app.post("/api/create", (req, res) => {
   let price = req.body.price;
   let img_url = req.body.img_url;
 
-  console.log(img_url)
+  console.log(img_url);
 
   client.query(
     "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, img_url, post_time) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
@@ -320,7 +335,7 @@ function sendEmail(req, res) {
   getBookName(req, res, function(bookName) {
     getMailList(req, res, function(mailArray) {
       deleteMailList(req, res, function(delete_) {
-        if (!mailArray || mailArray.length === 0){
+        if (!mailArray || mailArray.length === 0) {
           return;
         }
         for (let i = 0; i < mailArray.length - 1; i++) {
@@ -391,7 +406,7 @@ app.post("/api/email", (req, res) => {
   //add the netid to transaction, how to write this sql? this is a array!
   let isbn = req.body.isbn;
   if (netid === null) {
-    res.send(401)
+    res.send(401);
     return;
   }
   let id = "{" + netid + "}";
@@ -411,8 +426,6 @@ app.post("/api/email", (req, res) => {
   console.log("tid: " + netid);
 });
 
-
-
 app.get("/api/prices", (req, res) => {
   let normp = [];
   //let posts = [];
@@ -428,16 +441,13 @@ app.get("/api/prices", (req, res) => {
       (SELECT ta.price pri, ta.isbn isbn, ta.post_time from uiuc.transaction AS ta) AS groupStat \
       GROUP BY groupStat.isbn) AS h WHERE h.isbn=uiuc.transaction.isbn AND uiuc.transaction.tid>310 ORDER BY post_time",
     values: []
-  }
+  };
   client.query(query, (err, r) => {
-
-
-    var groupBy = function (xs, key) {
-
+    var groupBy = function(xs, key) {
       if (err) throw err;
       //console.log(r.rows);
 
-      return xs.reduce(function (rv, x) {
+      return xs.reduce(function(rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(parseFloat(x));
         return rv;
       }, {});
@@ -454,13 +464,13 @@ app.get("/api/prices", (req, res) => {
           left: '45%'
         },
         xAxis: {
-          type: 'category',
+          type: "category",
           data: [],
           name: "Relative Time",
-          left: '40%'
+          left: "40%"
         },
         yAxis: {
-          type: 'value',
+          type: "value",
           name: "Relative Price"
         },
         series: [{
@@ -470,20 +480,19 @@ app.get("/api/prices", (req, res) => {
         }]
       }
     });
-  }
-  )
-})
-
+  });
+});
 
 app.get("/api/sold", (req, res) => {
   const query = {
-    text: "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE sellerid = $1 AND buyerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
-    
-    values: [netid]//values: [req.query.id]
+    text:
+      "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE sellerid = $1 AND buyerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
+
+    values: [netid] //values: [req.query.id]
   };
 
   client.query(query, (err, r) => {
-    console.log(Object.keys(r.rows))
+    console.log(r.rows);
     res.send({
       option : {
         title : {
@@ -521,15 +530,15 @@ app.get("/api/sold", (req, res) => {
 )
 })
 
-
 app.get("/api/bought", (req, res) => {
   const query = {
-    text: "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE buyerid = $1 AND sellerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
-    values: [netid]//values: [req.query.id]
+    text:
+      "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE buyerid = $1 AND sellerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
+    values: [netid] //values: [req.query.id]
   };
 
   client.query(query, (err, r) => {
-    console.log(Object.keys(r.rows))
+    console.log(r.rows);
     res.send({
       option : {
         title : {
@@ -608,11 +617,10 @@ app.get("/api/recommendation", (req, res) =>{
                 data: r.rows
             }
         ]
-    }
-     });
-  }
-)
-})
+      }
+    });
+  });
+});
 
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

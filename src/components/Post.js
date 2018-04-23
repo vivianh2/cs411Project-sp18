@@ -1,41 +1,42 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import MenuItem from 'material-ui/Menu/MenuItem';
-import TextField from 'material-ui/TextField';
-import Button from 'material-ui/Button';
-import Grid from 'material-ui/Grid';
-import Dropzone from 'react-dropzone';
-import request from 'superagent';
+import React from "react";
+import PropTypes from "prop-types";
+import { withStyles } from "material-ui/styles";
+import MenuItem from "material-ui/Menu/MenuItem";
+import TextField from "material-ui/TextField";
+import Button from "material-ui/Button";
+import Grid from "material-ui/Grid";
+import Dropzone from "react-dropzone";
+import request from "superagent";
 
-const CLOUDINARY_UPLOAD_PRESET = 'readmeagain';
-const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/readmeagain/upload';
+const CLOUDINARY_UPLOAD_PRESET = "readmeagain";
+const CLOUDINARY_UPLOAD_URL =
+  "https://api.cloudinary.com/v1_1/readmeagain/upload";
 
 const styles = theme => ({
   container: {
-    width: '95%',
-    margin: '0 2.5%',
-    display: 'flex',
-    flexWrap: 'wrap',
+    width: "95%",
+    margin: "0 2.5%",
+    display: "flex",
+    flexWrap: "wrap"
   },
   textField: {
     marginLeft: theme.spacing.unit,
-    marginRight: theme.spacing.unit,
+    marginRight: theme.spacing.unit
   },
   menu: {
-    width: 200,
+    width: 200
   },
   button: {
-    margin: theme.spacing.unit,
-  },
+    margin: theme.spacing.unit
+  }
 });
 
-const conditions = ['New', 'Like New', 'Good', 'Acceptable', 'Unacceptable'];
+const conditions = ["New", "Like New", "Good", "Acceptable", "Unacceptable"];
 const currencies = [
   {
-    value: 'USD',
-    label: '$',
-  },
+    value: "USD",
+    label: "$"
+  }
   // {
   //   value: 'CNY',
   //   label: '¥',
@@ -44,99 +45,108 @@ const currencies = [
 
 class Post extends React.Component {
   state = {
-    isbn: '',
-    condition: '',
-    price: '',
-    contact: '',
-    currency: '',
+    isbn: "",
+    condition: "",
+    price: "",
+    contact: "",
+    currency: "",
     uploadedFile: null,
-    uploadedFileCloudinaryUrl: ''
+    uploadedFileCloudinaryUrl: ""
   };
 
   postData(url, data) {
     // Default options are marked with *
     return fetch(url, {
       body: JSON.stringify(data), // must match 'Content-Type' header
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, same-origin, *omit
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, same-origin, *omit
       headers: {
-        'content-type': 'application/json'
+        "content-type": "application/json"
       },
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, cors, *same-origin
-      redirect: 'follow', // *manual, follow, error
-      referrer: 'no-referrer', // *client, no-referrer
-    })
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, cors, *same-origin
+      redirect: "follow", // *manual, follow, error
+      referrer: "no-referrer" // *client, no-referrer
+    });
   }
 
   handleChange = name => event => {
     this.setState({
-      [name]: event.target.value,
+      [name]: event.target.value
     });
   };
 
   handleSubmit = event => {
     event.preventDefault();
     // check required fields
-    if(this.state.isbn === "" || this.state.condition === "" || this.state.price === ""
-    || this.state.contact === "" || this.state.currency === "" || this.state.uploadedFileCloudinaryUrl === ""){
+    if (
+      this.state.isbn === "" ||
+      this.state.condition === "" ||
+      this.state.price === "" ||
+      this.state.contact === "" ||
+      this.state.currency === "" ||
+      this.state.uploadedFileCloudinaryUrl === ""
+    ) {
       alert("Please fill all the entries");
       return;
-    }else{
+    } else {
       console.log(this.state);
-      this.postData('/api/create', {
+      this.postData("/api/create", {
         isbn: this.state.isbn,
         condition: this.state.condition,
         price: this.state.price,
         contact: this.state.contact,
         currency: this.state.currency,
         img_url: this.state.uploadedFileCloudinaryUrl
-      })
-        .then(response => {
-          if (response.ok){
-            alert("Your post has been received.");
-          } else {
-            alert(response.status + " " + response.statusText);
-          }
-        })
+      }).then(response => {
+        if (response.ok) {
+          alert("Your post has been received.");
+        } else {
+          alert(response.status + " " + response.statusText);
+        }
+      });
     }
+  };
 
-  }
-
-  onImageDrop = (files) => {
+  onImageDrop = files => {
     this.setState({
       uploadedFile: files[0]
     });
 
-    let upload = request.post(CLOUDINARY_UPLOAD_URL)
-                     .field('upload_preset', CLOUDINARY_UPLOAD_PRESET)
-                     .field('file', files[0]);
+    let upload = request
+      .post(CLOUDINARY_UPLOAD_URL)
+      .field("upload_preset", CLOUDINARY_UPLOAD_PRESET)
+      .field("file", files[0]);
     upload.end((err, response) => {
       if (err) {
         console.error(err);
       }
 
-      if (response.body.secure_url !== '') {
+      if (response.body.secure_url !== "") {
         this.setState({
-          uploadedFileCloudinaryUrl: response.body.secure_url   // 我感觉是这里出了问题?????
+          uploadedFileCloudinaryUrl: response.body.secure_url // 我感觉是这里出了问题?????
         });
       }
     });
-
-  }
+  };
 
   render() {
     const { classes } = this.props;
 
     return (
-      <form className={classes.container} noValidate autoComplete="off" onSubmit={this.handleSubmit}>
+      <form
+        className={classes.container}
+        noValidate
+        autoComplete="off"
+        onSubmit={this.handleSubmit}
+      >
         <TextField
           id="isbn"
           required
           label="ISBN"
           className={classes.textField}
           value={this.state.isbn}
-          onChange={this.handleChange('isbn')}
+          onChange={this.handleChange("isbn")}
           margin="normal"
           fullWidth
         />
@@ -147,11 +157,11 @@ class Post extends React.Component {
           label="Condition"
           className={classes.textField}
           value={this.state.condition}
-          onChange={this.handleChange('condition')}
+          onChange={this.handleChange("condition")}
           SelectProps={{
             MenuProps: {
-              className: classes.menu,
-            },
+              className: classes.menu
+            }
           }}
           helperText="Please select book condition"
           margin="normal"
@@ -169,11 +179,11 @@ class Post extends React.Component {
           label="Currency"
           className={classes.textField}
           value={this.state.currency}
-          onChange={this.handleChange('currency')}
+          onChange={this.handleChange("currency")}
           SelectProps={{
             MenuProps: {
-              className: classes.menu,
-            },
+              className: classes.menu
+            }
           }}
           helperText="Please select your currency"
           margin="normal"
@@ -190,7 +200,7 @@ class Post extends React.Component {
           label="Price"
           className={classes.textField}
           value={this.state.price}
-          onChange={this.handleChange('price')}
+          onChange={this.handleChange("price")}
           margin="normal"
           type="number"
         />
@@ -200,34 +210,46 @@ class Post extends React.Component {
           label="Contact information"
           className={classes.textField}
           value={this.state.contact}
-          onChange={this.handleChange('contact')}
+          onChange={this.handleChange("contact")}
           margin="normal"
           fullWidth
           placeholder="Messenger/ Wechat: ****"
           InputLabelProps={{
-            shrink: true,
+            shrink: true
           }}
         />
-        <Grid container justify='flex-end'>
+        <Grid container justify="flex-end">
+          <div className="FileUpload">
+            <Dropzone
+              onDrop={this.onImageDrop}
+              multiple={false}
+              accept="image/*"
+            >
+              <div>Drop an image or click to select a file to upload.</div>
+            </Dropzone>
+          </div>
 
-            <div className="FileUpload">
-              <Dropzone
-                onDrop={this.onImageDrop}
-                multiple={false}
-                accept="image/*">
-                <div>Drop an image or click to select a file to upload.</div>
-              </Dropzone>
-            </div>
-
-            <div>
-              {this.state.uploadedFileCloudinaryUrl === '' ? null :
+          <div>
+            {this.state.uploadedFileCloudinaryUrl === "" ? null : (
               <div>
                 <p>{this.state.uploadedFile.name}</p>
-                <img src={this.state.uploadedFileCloudinaryUrl} alt="" width={400} height={300} />
-              </div>}
-            </div>
+                <img
+                  src={this.state.uploadedFileCloudinaryUrl}
+                  alt=""
+                  width={400}
+                  height={300}
+                />
+              </div>
+            )}
+          </div>
 
-          <Button variant="raised" color="primary" className={classes.button} type="submit" value="submit">
+          <Button
+            variant="raised"
+            color="primary"
+            className={classes.button}
+            type="submit"
+            value="submit"
+          >
             Confirm
           </Button>
         </Grid>
@@ -237,7 +259,7 @@ class Post extends React.Component {
 }
 
 Post.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(Post);

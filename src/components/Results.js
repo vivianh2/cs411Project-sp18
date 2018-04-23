@@ -1,19 +1,19 @@
 import React, { Component } from "react";
 
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import List from 'material-ui/List';
-import Typography from 'material-ui/Typography';
+import PropTypes from "prop-types";
+import { withStyles } from "material-ui/styles";
+import List from "material-ui/List";
+import Typography from "material-ui/Typography";
 
-import Item from './Item';
+import Item from "./Item";
 
 const styles = theme => ({
   root: {
-    width: '100%',
-    backgroundColor: theme.palette.background,
+    width: "100%",
+    backgroundColor: theme.palette.background
   },
   type: {
-    margin: '2% 5%',
+    margin: "2% 5%"
   }
 });
 
@@ -21,15 +21,15 @@ class Results extends Component {
   state = {
     query: this.props.location.state.query,
     books: [],
-    posts: [],
-  }
+    posts: []
+  };
 
   componentDidMount() {
-    this.search(this.state.query)
+    this.search(escape(this.state.query))
       .then(res =>
         this.setState({
           books: res.books,
-          posts: res.posts,
+          posts: res.posts
         })
       )
       .catch(err => console.log(err));
@@ -47,7 +47,7 @@ class Results extends Component {
     this.setState({ open: !this.state.open });
   };
 
-  render(){
+  render() {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
@@ -55,9 +55,14 @@ class Results extends Component {
           Search Results
         </Typography>
         <List>
-          {this.state.books.map((book, i) =>
-            <Item isbn={book.isbn} posts={this.state.posts[i]} key={book.isbn} img={this.state.posts[i].img_url}/>
-          )}
+          {this.state.books.map((book, i) => (
+            <Item
+              isbn={book.isbn}
+              posts={this.state.posts[i]}
+              key={book.isbn}
+              img={this.state.posts[i].img_url}
+            />
+          ))}
         </List>
       </div>
     );
@@ -65,7 +70,7 @@ class Results extends Component {
 }
 
 Results.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(Results);

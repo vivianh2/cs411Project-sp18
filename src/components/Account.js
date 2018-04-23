@@ -8,6 +8,7 @@ import AccountIcon from "material-ui-icons/AccountCircle";
 import HistoryIcon from "material-ui-icons/History";
 import ReactEcharts from 'echarts-for-react';
 import echarts from 'echarts';
+
 import Ratings from "./Ratings";
 import History from "./History";
 
@@ -23,7 +24,7 @@ const styles = theme => ({
   primary: {},
   icon: {},
   menu: {
-    height: "100%",
+    height: "100%"
   }
 });
 
@@ -38,12 +39,7 @@ class Account extends Component {
     selectedItem: "account",
   };
 
-  //this.state.option_data
-
-  componentWillUnmount() {
-
-  }
-
+  componentWillUnmount() {}
 
   componentDidMount() {
     
@@ -68,13 +64,13 @@ class Account extends Component {
       this.setState({
         option_sold: res.option
       })
-      console.log("option_sold is: " + this.state.option_sold)
-    }
-    ).catch(err => console.log(err));
+      .catch(err => console.log(err));
 
-    this.getBoughtChart(this.state.netid).then(res => {
-      this.setState({
-        option_bought: res.option
+    this.getBoughtChart(this.state.netid)
+      .then(res => {
+        this.setState({
+          option_bought: res.option
+        });
       })
       console.log("option_bought is: " + this.state.option_bought)
     }
@@ -82,7 +78,6 @@ class Account extends Component {
   
     var myChart = echarts.init(document.getElementById('main'), 'light')
     myChart.setOption(this.state.option_recommand)
-    
   }
 
   getAccount = async netid => {
@@ -92,7 +87,6 @@ class Account extends Component {
     if (response.status !== 200) throw Error(body.message);
     return body;
   };
-
 
   getSoldChart = async netid => {
     //const response = await fetch("/api/sold?id=" + netid);
@@ -120,20 +114,24 @@ class Account extends Component {
 
   menuClick = (value) => {
     this.setState({
-      selectedItem: value,
-    })
-    console.log(this.state.selectedItem)
-  }
+      selectedItem: value
+    });
+    console.log(this.state.selectedItem);
+  };
 
   
 
   render() {
     const { classes } = this.props;
     return (
-      <Grid container justify="flex-start" >
+      <Grid container justify="flex-start">
         <Grid item md={2}>
           <MenuList className={classes.menu}>
-            <MenuItem className={classes.menuItem} value="account" onClick={() => this.menuClick("account")}>
+            <MenuItem
+              className={classes.menuItem}
+              value="account"
+              onClick={() => this.menuClick("account")}
+            >
               <ListItemIcon className={classes.icon}>
                 <AccountIcon />
               </ListItemIcon>
@@ -143,7 +141,11 @@ class Account extends Component {
                 primary="Account"
               />
             </MenuItem>
-            <MenuItem className={classes.menuItem} value="history" onClick={() => this.menuClick("history")}>
+            <MenuItem
+              className={classes.menuItem}
+              value="history"
+              onClick={() => this.menuClick("history")}
+            >
               <ListItemIcon className={classes.icon}>
                 <HistoryIcon />
               </ListItemIcon>
@@ -196,7 +198,7 @@ class Account extends Component {
           {
             this.state.selectedItem === "history" &&
             <History netid={this.state.netid} />
-          }
+          )}
         </Grid>
       </Grid>
     );
