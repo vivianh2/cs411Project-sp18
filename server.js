@@ -93,7 +93,7 @@ app.get("/api/account", (req, res) => {
 app.get("/api/suggestions", (req, res) => {
   const query = {
     text:
-      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction",
+      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction UNION SELECT DISTINCT name AS col FROM uiuc.book",
     rowMode: "array"
   };
 
@@ -107,13 +107,24 @@ app.get("/api/search", (req, res) => {
   console.log("Search " + req.query.q);
   let query;
   if (isNaN(req.query.q)) {
-    query = {
-      text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
-        "FROM uiuc.Transaction " +
-        "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
-      values: req.query.q.split(" ")
-    };
+    if(isNaN(parseFloat(req.query.q.split(" ")[1])) == true){
+      query = {
+        text:
+          "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
+          "FROM uiuc.Transaction " +
+          "WHERE ISBN IN (SELECT isbn FROM uiuc.book WHERE name = $1)",
+        values: [req.query.q]
+      };
+    }else{
+      query = {
+        text:
+          "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
+          "FROM uiuc.Transaction " +
+          "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
+        values: req.query.q.split(" ")
+      };
+    }
+
   } else {
     query = {
       text:
