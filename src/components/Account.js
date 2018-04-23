@@ -65,7 +65,6 @@ class Account extends Component {
         this.setState({
           option_sold: res.option
         });
-        console.log("option_sold is: " + this.state.option_sold);
       })
       .catch(err => console.log(err));
 
@@ -74,7 +73,6 @@ class Account extends Component {
         this.setState({
           option_bought: res.option
         });
-        console.log("option_bought is: " + this.state.option_bought);
       })
       .catch(err => console.log(err));
   }
@@ -180,7 +178,7 @@ class Account extends Component {
 
               <ReactEcharts
                 option={this.state.option_bought}
-                style={{ height: "300px", padding: "25px" }}
+                style={{ height: "300px" }}
                 opts={{ renderer: "svg" }} // use svg to render the chart.
               />
             </React.Fragment>
