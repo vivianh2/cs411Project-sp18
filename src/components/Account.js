@@ -6,7 +6,7 @@ import { MenuList, MenuItem } from "material-ui/Menu";
 import { ListItemIcon, ListItemText } from "material-ui/List";
 import AccountIcon from "material-ui-icons/AccountCircle";
 import HistoryIcon from "material-ui-icons/History";
-import ReactEcharts from 'echarts-for-react';
+import ReactEcharts from "echarts-for-react";
 
 import Ratings from "./Ratings";
 import History from "./History";
@@ -23,7 +23,7 @@ const styles = theme => ({
   primary: {},
   icon: {},
   menu: {
-    height: "100%",
+    height: "100%"
   }
 });
 
@@ -35,16 +35,12 @@ class Account extends Component {
     option_prices: {},
     option_sold: {},
     option_bought: {},
-    selectedItem: "account",
+    selectedItem: "account"
   };
 
   //this.state.option_data
 
-  componentWillUnmount() {
-
-
-  }
-
+  componentWillUnmount() {}
 
   componentDidMount() {
     this.getAccount(this.state.netid)
@@ -63,22 +59,24 @@ class Account extends Component {
     //     console.log("option_data is: " + this.state.option_data)
     //   }
     //   ).catch(err => console.log(err));
-    
-    this.getSoldChart(this.state.netid).then(res => {
-      this.setState({
-        option_sold: res.option
-      })
-      console.log("option_sold is: " + this.state.option_sold)
-    }
-    ).catch(err => console.log(err));
 
-    this.getBoughtChart(this.state.netid).then(res => {
-      this.setState({
-        option_bought: res.option
+    this.getSoldChart(this.state.netid)
+      .then(res => {
+        this.setState({
+          option_sold: res.option
+        });
+        console.log("option_sold is: " + this.state.option_sold);
       })
-      console.log("option_bought is: " + this.state.option_bought)
-    }
-    ).catch(err => console.log(err));
+      .catch(err => console.log(err));
+
+    this.getBoughtChart(this.state.netid)
+      .then(res => {
+        this.setState({
+          option_bought: res.option
+        });
+        console.log("option_bought is: " + this.state.option_bought);
+      })
+      .catch(err => console.log(err));
   }
 
   getAccount = async netid => {
@@ -96,7 +94,6 @@ class Account extends Component {
     return body;
   };
 
-
   getSoldChart = async netid => {
     //const response = await fetch("/api/sold?id=" + netid);
     const response = await fetch("/api/sold");
@@ -113,20 +110,24 @@ class Account extends Component {
     return body;
   };
 
-  menuClick = (value) => {
+  menuClick = value => {
     this.setState({
-      selectedItem: value,
-    })
-    console.log(this.state.selectedItem)
-  }
+      selectedItem: value
+    });
+    console.log(this.state.selectedItem);
+  };
 
   render() {
     const { classes } = this.props;
     return (
-      <Grid container justify="flex-start" >
+      <Grid container justify="flex-start">
         <Grid item md={2}>
           <MenuList className={classes.menu}>
-            <MenuItem className={classes.menuItem} value="account" onClick={() => this.menuClick("account")}>
+            <MenuItem
+              className={classes.menuItem}
+              value="account"
+              onClick={() => this.menuClick("account")}
+            >
               <ListItemIcon className={classes.icon}>
                 <AccountIcon />
               </ListItemIcon>
@@ -136,7 +137,11 @@ class Account extends Component {
                 primary="Account"
               />
             </MenuItem>
-            <MenuItem className={classes.menuItem} value="history" onClick={() => this.menuClick("history")}>
+            <MenuItem
+              className={classes.menuItem}
+              value="history"
+              onClick={() => this.menuClick("history")}
+            >
               <ListItemIcon className={classes.icon}>
                 <HistoryIcon />
               </ListItemIcon>
@@ -149,47 +154,40 @@ class Account extends Component {
           </MenuList>
         </Grid>
         <Grid item md={10}>
-          {
-            this.state.selectedItem === "account" &&
-            (
-              <React.Fragment>
-                <Typography
-                  variant="headline"
-                  align="left"
-                  color="inherit"
-                  style={{ margin: "1% 2%" }}
-                >
-                  {this.state.username}
-                </Typography>
-                <Ratings rating={this.state.rating} />
+          {this.state.selectedItem === "account" && (
+            <React.Fragment>
+              <Typography
+                variant="headline"
+                align="left"
+                color="inherit"
+                style={{ margin: "1% 2%" }}
+              >
+                {this.state.username}
+              </Typography>
+              <Ratings rating={this.state.rating} />
 
-                {/* <ReactEcharts
+              {/* <ReactEcharts
                   option={this.state.option_prices}
                   style={{ height: '300px' }}
                   opts={{ renderer: 'svg' }} // use svg to render the chart.
                 /> */}
 
-                <ReactEcharts
-                  option={this.state.option_sold}
-                  style={{ height: '300px' }}
-                  opts={{ renderer: 'svg' }} // use svg to render the chart.
-                />
+              <ReactEcharts
+                option={this.state.option_sold}
+                style={{ height: "300px" }}
+                opts={{ renderer: "svg" }} // use svg to render the chart.
+              />
 
-
-                <ReactEcharts
-                  option={this.state.option_bought}
-                  style={{ height: '300px', padding: '25px' }}
-                  opts={{ renderer: 'svg' }} // use svg to render the chart.
-                />
-
-
-              </React.Fragment>
-            )
-          }
-          {
-            this.state.selectedItem === "history" &&
+              <ReactEcharts
+                option={this.state.option_bought}
+                style={{ height: "300px", padding: "25px" }}
+                opts={{ renderer: "svg" }} // use svg to render the chart.
+              />
+            </React.Fragment>
+          )}
+          {this.state.selectedItem === "history" && (
             <History netid={this.state.netid} />
-          }
+          )}
         </Grid>
       </Grid>
     );
