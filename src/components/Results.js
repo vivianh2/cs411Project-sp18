@@ -25,7 +25,7 @@ class Results extends Component {
   }
 
   componentDidMount() {
-    this.search(this.state.query)
+    this.search(escape(this.state.query))
       .then(res =>
         this.setState({
           books: res.books,

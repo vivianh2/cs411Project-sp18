@@ -10,9 +10,8 @@ import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Modal from 'material-ui/Modal';
-import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
+import Card, { CardContent, CardMedia } from 'material-ui/Card';
 import Divider from 'material-ui/Divider';
-import Snackbar from 'material-ui/Snackbar';
 import Email from 'material-ui-icons/Email';
 
 const isbn = require('node-isbn');
@@ -226,7 +225,7 @@ class Item extends Component {
           </List>
         </Collapse>
         <Button color="primary" onClick={this.handleEmail}>
-          <Email className={classes.leftIcon, classes.iconSmall}/>
+          <Email className={[classes.leftIcon, classes.iconSmall].join(' ')}/>
           Email Me when new book get posted
         </Button>
       </div>

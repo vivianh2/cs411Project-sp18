@@ -136,7 +136,6 @@ app.get("/api/search", (req, res) => {
   }
 
   client.query(query, (err, r) => {
-    console.log(err);
     if (err) throw err;
 
     let books = [];
