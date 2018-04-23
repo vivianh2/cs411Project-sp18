@@ -93,7 +93,7 @@ app.get("/api/account", (req, res) => {
 app.get("/api/suggestions", (req, res) => {
   const query = {
     text:
-      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction",
+      "SELECT DISTINCT concat(Subject, ' ', Number) AS col FROM uiuc.Class UNION SELECT DISTINCT isbn AS col FROM uiuc.transaction UNION SELECT DISTINCT name AS col FROM uiuc.book",
     rowMode: "array"
   };
 
@@ -103,46 +103,66 @@ app.get("/api/suggestions", (req, res) => {
   });
 });
 
+var groupBy = function(xs, key) {
+  return xs.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
+
 app.get("/api/search", (req, res) => {
   console.log("Search " + req.query.q);
   let query;
   if (isNaN(req.query.q)) {
-    query = {
-      text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
-        "FROM uiuc.Transaction " +
-        "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
-      values: req.query.q.split(" ")
-    };
+    if (isNaN(parseFloat(req.query.q.split(" ")[1])) == true) {
+      query = {
+        text:
+          "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
+             FROM uiuc.Transaction \
+             WHERE ISBN IN (SELECT isbn FROM uiuc.book WHERE name = $1) \
+           UNION SELECT null, null, null, null, ISBN, null \
+             FROM uiuc.book WHERE name = $1",
+        values: [req.query.q]
+      };
+    } else {
+      query = {
+        text:
+          "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
+             FROM uiuc.Transaction \
+             WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2) \
+               AND BuyerId IS NULL \
+           UNION SELECT null, null, null, null, isbn, null \
+             FROM (SELECT unnest(isbn_list) as isbn from uiuc.Class \
+             WHERE Subject = $1 and Number = $2) as isbn_all",
+        values: req.query.q.split(" ")
+      };
+    }
   } else {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
-        "FROM uiuc.Transaction " +
-        "WHERE ISBN = $1",
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
+           FROM uiuc.Transaction \
+           WHERE ISBN = $1 \
+             AND BuyerId IS NULL \
+         UNION SELECT null, null, null, null, $1, null",
       values: [req.query.q]
     };
   }
 
   client.query(query, (err, r) => {
-    console.log(err);
     if (err) throw err;
 
     let books = [];
     let posts = [];
 
-    var groupBy = function(xs, key) {
-      return xs.reduce(function(rv, x) {
-        (rv[x[key]] = rv[x[key]] || []).push(x);
-        return rv;
-      }, {});
-    };
-
     let isbn_transaction = groupBy(r.rows, "isbn");
+    console.log(isbn_transaction);
 
     for (let isbn in isbn_transaction) {
       books.push({ isbn: isbn });
-      posts.push(isbn_transaction[isbn]);
+      posts.push(
+        isbn_transaction[isbn].slice(0, isbn_transaction[isbn].length - 1)
+      );
     }
 
     res.send({
@@ -158,7 +178,8 @@ app.get("/api/history", (req, res) => {
     text:
       "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time, t.price \
        FROM uiuc.transaction t, uiuc.book b, uiuc.user u \
-       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid",
+       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid\
+       ORDER BY t.post_time DESC",
     values: [req.query.id]
   };
   client.query(query, (err, r) => {
@@ -413,12 +434,12 @@ app.get("/api/prices", (req, res) => {
   console.log("Checking Price");
   const query = {
     text:
-      "SELECT ((price-minPrice) / itv)::NUMERIC normp, post_time FROM \
+      "SELECT ((price-minPrice)::NUMERIC / itv::NUMERIC + 0.01*random()) normp, post_time FROM \
       uiuc.transaction \
       CROSS JOIN \
       (select MIN(groupStat.pri) minPrice, ((MAX(groupStat.pri) - MIN(groupStat.pri))::NUMERIC + 0.001) itv, groupStat.isbn from \
       (SELECT ta.price pri, ta.isbn isbn, ta.post_time from uiuc.transaction AS ta) AS groupStat \
-      GROUP BY groupStat.isbn) AS h WHERE h.isbn=uiuc.transaction.isbn ORDER BY post_time",
+      GROUP BY groupStat.isbn) AS h WHERE h.isbn=uiuc.transaction.isbn AND uiuc.transaction.tid>310 ORDER BY post_time",
     values: []
   };
   client.query(query, (err, r) => {
@@ -439,8 +460,8 @@ app.get("/api/prices", (req, res) => {
       option: {
         title: {
           show: true,
-          text: "Book Index",
-          left: "40%"
+          text: "Overall Book Price Trend",
+          left: '45%'
         },
         xAxis: {
           type: "category",
@@ -452,12 +473,11 @@ app.get("/api/prices", (req, res) => {
           type: "value",
           name: "Relative Price"
         },
-        series: [
-          {
-            data: Object.keys(normp_array),
-            type: "line"
-          }
-        ]
+        series: [{
+          data: Object.keys(normp_array),
+          type: 'line',
+          smooth: true
+        }]
       }
     });
   });
@@ -473,44 +493,42 @@ app.get("/api/sold", (req, res) => {
 
   client.query(query, (err, r) => {
     console.log(r.rows);
-    if (r.rows.length == 0) {
-      r.rows = [{ value: "1", name: "Nothing here yet" }];
-    }
     res.send({
-      option: {
-        title: {
-          text: "Books that you've sold",
-          x: "center"
+      option : {
+        title : {
+            text: 'Sold Book',
+            x:'center'
         },
-        tooltip: {
-          trigger: "item",
-          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
         },
         legend: {
-          orient: "vertical",
-          left: "left",
-          data: []
+            orient: 'vertical',
+            left: 'left',
+            data: []
         },
-        series: [
-          {
-            name: "Book:",
-            type: "pie",
-            radius: "55%",
-            center: ["50%", "60%"],
-            data: r.rows,
-            itemStyle: {
-              emphasis: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: "rgba(0, 0, 0, 0.5)"
-              }
+        series : [
+            {
+                name: 'Book:',
+                type: 'pie',
+                radius : '55%',
+                center: ['50%', '60%'],
+                data:r.rows,
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
             }
-          }
         ]
-      }
-    });
-  });
-});
+    }
+     });
+  }
+)
+})
 
 app.get("/api/bought", (req, res) => {
   const query = {
@@ -521,43 +539,88 @@ app.get("/api/bought", (req, res) => {
 
   client.query(query, (err, r) => {
     console.log(r.rows);
-    if (r.rows.length == 0) {
-      r.rows = [{ value: "1", name: "Nothing here yet" }];
-    }
     res.send({
-      option: {
-        title: {
-          text: "Books that you've purchased",
-          x: "center"
+      option : {
+        title : {
+            text: 'Bought Book',
+            x:'center'
         },
-        tooltip: {
-          trigger: "item",
-          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
         },
         legend: {
-          orient: "vertical",
-          left: "left",
-          data: []
+            orient: 'vertical',
+            left: 'left',
+            data: []
         },
-        series: [
-          {
-            name: "Book:",
-            type: "pie",
-            radius: "55%",
-            center: ["50%", "60%"],
-            data: r.rows,
-            itemStyle: {
-              emphasis: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: "rgba(0, 0, 0, 0.5)"
-              }
+        series : [
+            {
+                name: 'Book:',
+                type: 'pie',
+                radius : '55%',
+                center: ['50%', '60%'],
+                data:r.rows,
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
             }
-          }
+        ]
+    }
+
+     });
+  }
+)
+})
+
+app.get("/api/recommendation", (req, res) =>{
+
+  const query = {
+    text: "SELECT ts.cnt AS value, uiuc.book.name AS name FROM\
+    (select isbn, count(*) cnt from (select ISBN from (select count(*), isbn from uiuc.transaction WHERE isbn <> '9780738092522' group by isbn) as f NATURAL JOIN uiuc.transaction ORDER BY count DESC) as gg group by isbn)  AS ts, uiuc.book WHERE ts.isbn = uiuc.book.isbn ORDER BY CNT DESC LIMIT 8 ",
+    values: []//values: [req.query.id]
+  };
+
+  client.query(query, (err, r) => {
+    //console.log(Object.keys(r.rows))
+    res.send({
+      
+   option: {
+        title : {
+            text: 'Recommendation',
+            x:'center'
+        },
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        toolbox: {
+            show : true,
+            
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          data: []
+      },
+        calculable : true,
+        series : [
+            {
+                name:'Recommend Book:',
+                type:'pie',
+                radius : [20, 85],
+                roseType : 'area',
+                data: r.rows
+            }
         ]
       }
     });
   });
 });
+
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

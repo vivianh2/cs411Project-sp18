@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 
 import Search from './Search';
+import Trend from "./Trend";
 
 class App extends Component {
 
@@ -9,9 +10,10 @@ class App extends Component {
     return (
       <div className="App">
         <div id="main">
-          <p>Enter the <del>book name,</del> class name or ISBN to start search.</p>
+          <p>Enter the book name, class name or ISBN to start search.</p>
           <Search/>
         </div>
+        <Trend />
       </div>
     );
   }
