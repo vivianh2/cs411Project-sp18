@@ -211,6 +211,11 @@ class Item extends Component {
     } else{
       posts = <ListItem className={classes.nested}>
                 <ListItemText inset primary='No result on this item.'/>
+
+                <Button color="primary" onClick={this.handleEmail}>
+                  <Email className={classes.leftIcon, classes.iconSmall}/>
+                  Email Me when new book get posted
+                </Button>
               </ListItem>
     }
 
@@ -225,10 +230,6 @@ class Item extends Component {
             { posts }
           </List>
         </Collapse>
-        <Button color="primary" onClick={this.handleEmail}>
-          <Email className={classes.leftIcon, classes.iconSmall}/>
-          Email Me when new book get posted
-        </Button>
       </div>
     );
   }

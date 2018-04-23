@@ -116,19 +116,23 @@ app.get("/api/search", (req, res) => {
   if (isNaN(req.query.q)) {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, BuyerId, ISBN, img_url \
-         FROM uiuc.Transaction \
-         WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2) \
-           AND BuyerId IS NULL",
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
+           FROM uiuc.Transaction \
+           WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2) \
+             AND BuyerId IS NULL \
+         UNION SELECT null, null, null, null, isbn, null \
+           FROM (SELECT unnest(isbn_list) as isbn from uiuc.Class \
+           WHERE Subject = $1 and Number = $2) as isbn_all",
       values: req.query.q.split(" ")
     };
   } else {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, BuyerId, ISBN, img_url \
-         FROM uiuc.Transaction \
-         WHERE ISBN = $1 \
-           AND BuyerId IS NULL",
+        "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
+           FROM uiuc.Transaction \
+           WHERE ISBN = $1 \
+             AND BuyerId IS NULL \
+         UNION SELECT null, null, null, null, $1, null",
       values: [req.query.q]
     };
   }
@@ -141,10 +145,11 @@ app.get("/api/search", (req, res) => {
     let posts = [];
 
     let isbn_transaction = groupBy(r.rows, "isbn");
+    console.log(isbn_transaction);
 
     for (let isbn in isbn_transaction) {
       books.push({ isbn: isbn });
-      posts.push(isbn_transaction[isbn]);
+      posts.push(isbn_transaction[isbn].slice(0, isbn_transaction[isbn].length-1));
     }
 
     res.send({
