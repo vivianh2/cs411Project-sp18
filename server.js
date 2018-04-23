@@ -103,23 +103,32 @@ app.get("/api/suggestions", (req, res) => {
   });
 });
 
+var groupBy = function(xs, key) {
+  return xs.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
+
 app.get("/api/search", (req, res) => {
   console.log("Search " + req.query.q);
   let query;
   if (isNaN(req.query.q)) {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
-        "FROM uiuc.Transaction " +
-        "WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2)",
+        "SELECT TID, Condition, Price, SellerId, BuyerId, ISBN, img_url \
+         FROM uiuc.Transaction \
+         WHERE ISBN IN (SELECT unnest(isbn_list) FROM uiuc.Class WHERE Subject = $1 AND Number = $2) \
+           AND BuyerId IS NULL",
       values: req.query.q.split(" ")
     };
   } else {
     query = {
       text:
-        "SELECT TID, Condition, Price, SellerId, ISBN, img_url " +
-        "FROM uiuc.Transaction " +
-        "WHERE ISBN = $1",
+        "SELECT TID, Condition, Price, SellerId, BuyerId, ISBN, img_url \
+         FROM uiuc.Transaction \
+         WHERE ISBN = $1 \
+           AND BuyerId IS NULL",
       values: [req.query.q]
     };
   }
@@ -130,13 +139,6 @@ app.get("/api/search", (req, res) => {
 
     let books = [];
     let posts = [];
-
-    var groupBy = function(xs, key) {
-      return xs.reduce(function(rv, x) {
-        (rv[x[key]] = rv[x[key]] || []).push(x);
-        return rv;
-      }, {});
-    };
 
     let isbn_transaction = groupBy(r.rows, "isbn");
 
@@ -158,7 +160,8 @@ app.get("/api/history", (req, res) => {
     text:
       "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time, t.price \
        FROM uiuc.transaction t, uiuc.book b, uiuc.user u \
-       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid",
+       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid\
+       ORDER BY t.post_time DESC",
     values: [req.query.id]
   };
   client.query(query, (err, r) => {
@@ -473,9 +476,6 @@ app.get("/api/sold", (req, res) => {
 
   client.query(query, (err, r) => {
     console.log(r.rows);
-    if (r.rows.length == 0) {
-      r.rows = [{ value: "1", name: "Nothing here yet" }];
-    }
     res.send({
       option: {
         title: {
@@ -521,9 +521,6 @@ app.get("/api/bought", (req, res) => {
 
   client.query(query, (err, r) => {
     console.log(r.rows);
-    if (r.rows.length == 0) {
-      r.rows = [{ value: "1", name: "Nothing here yet" }];
-    }
     res.send({
       option: {
         title: {
