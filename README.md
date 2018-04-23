@@ -12,6 +12,6 @@ Live at https://readmeagain.herokuapp.com
 1. Clone the project with `git clone https://github.com/vivianh2/cs411Project-sp18.git`  
 Please PLEASE do **NOT** fork  
 2. `cd` into the project directory  
-3. Run `npm install` or `yarn` to install all the modules and dependencies
+3. Run `npm install` to install all the modules and dependencies
 It may take a while
-4. Start the client and the server with `npm test` or `yarn test`
+4. Start the client and the server with `npm test`
