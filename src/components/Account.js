@@ -32,7 +32,6 @@ class Account extends Component {
     netid: this.props.location.state.netid,
     username: this.props.location.state.username,
     rating: 0,
-    option_prices: {},
     option_sold: {},
     option_bought: {},
     selectedItem: "account",
@@ -85,13 +84,6 @@ class Account extends Component {
     const response = await fetch("/api/account?id=" + netid);
     const body = await response.json();
 
-    if (response.status !== 200) throw Error(body.message);
-    return body;
-  };
-
-  getPriceChart = async netid => {
-    const response = await fetch("/api/prices");
-    const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
     return body;
   };
@@ -162,12 +154,6 @@ class Account extends Component {
                   {this.state.username}
                 </Typography>
                 <Ratings rating={this.state.rating} />
-
-                {/* <ReactEcharts
-                  option={this.state.option_prices}
-                  style={{ height: '300px' }}
-                  opts={{ renderer: 'svg' }} // use svg to render the chart.
-                /> */}
 
                 <ReactEcharts
                   option={this.state.option_sold}

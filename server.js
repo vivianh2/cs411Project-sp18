@@ -421,7 +421,7 @@ app.get("/api/prices", (req, res) => {
   console.log("Checking Price");
   const query = {
     text:
-      "SELECT ((price-minPrice) / itv)::NUMERIC normp, post_time FROM \
+      "SELECT ((price-minPrice)::NUMERIC / itv::NUMERIC + 0.01*random()) normp, post_time FROM \
       uiuc.transaction \
       CROSS JOIN \
       (select MIN(groupStat.pri) minPrice, ((MAX(groupStat.pri) - MIN(groupStat.pri))::NUMERIC + 0.001) itv, groupStat.isbn from \
@@ -451,7 +451,7 @@ app.get("/api/prices", (req, res) => {
         title: {
           show: true,
           text: "Book Index",
-          left: '40%'
+          left: '45%'
         },
         xAxis: {
           type: 'category',
@@ -465,7 +465,8 @@ app.get("/api/prices", (req, res) => {
         },
         series: [{
           data: Object.keys(normp_array),
-          type: 'line'
+          type: 'line',
+          smooth: true
         }]
       }
     });

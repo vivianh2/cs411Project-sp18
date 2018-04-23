@@ -226,7 +226,7 @@ class Item extends Component {
           </List>
         </Collapse>
         <Button color="primary" onClick={this.handleEmail}>
-          <Email className={classes.leftIcon, classes.iconSmall}/>
+          <Email className={classes.leftIco, classes.iconSmall}/>
           Email Me when new book get posted
         </Button>
       </div>
