@@ -89,9 +89,10 @@ class Post extends React.Component {
     ) {
       alert("Please fill all the entries");
       return;
-    } else {
-      console.log(this.state);
-      this.postData("/api/create", {
+    } else if (this.state.isbn.length != 10 || this.state.isbn.length != 13){
+      alert("ISBN length incorrect")
+    } else{
+      this.postData('/api/create', {
         isbn: this.state.isbn,
         condition: this.state.condition,
         price: this.state.price,
