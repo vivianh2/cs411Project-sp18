@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "production") {
     connectionString: process.env.DATABASE_URL,
     ssl: true,
   });
-} else{
+} else {
   client = new Client({
     connectionString: process.env.DATABASE_URL,
   });
@@ -136,8 +136,8 @@ app.get("/api/search", (req, res) => {
     let books = [];
     let posts = [];
 
-    var groupBy = function(xs, key) {
-      return xs.reduce(function(rv, x) {
+    var groupBy = function (xs, key) {
+      return xs.reduce(function (rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(x);
         return rv;
       }, {});
@@ -216,27 +216,27 @@ app.post("/api/received", (req, res) => {
 
 app.post("/api/create", (req, res) => {
   console.log(req.body);
-    let isbn = req.body.isbn;
-    let condition = req.body.condition;
-    let price = req.body.price;
-    let img_url = req.body.img_url;
+  let isbn = req.body.isbn;
+  let condition = req.body.condition;
+  let price = req.body.price;
+  let img_url = req.body.img_url;
 
-    console.log(img_url)
+  console.log(img_url)
 
-    client.query(
-        "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, img_url, post_time) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
-        [isbn, condition, price, netid, img_url],
-        (err, r) => {
-          if (err) {
-            throw err;
-          } else {
-            console.log("Insert post done");
-            res.sendStatus(200);
-            //send email when there is a new book be posted.
-            sendEmail(req, res);
-          }
-        }
-    );
+  client.query(
+    "INSERT INTO uiuc.Transaction (isbn, condition, price, sellerid, img_url, post_time) VALUES($1, $2, $3, $4, $5, CURRENT_TIMESTAMP);",
+    [isbn, condition, price, netid, img_url],
+    (err, r) => {
+      if (err) {
+        throw err;
+      } else {
+        console.log("Insert post done");
+        res.sendStatus(200);
+        //send email when there is a new book be posted.
+        sendEmail(req, res);
+      }
+    }
+  );
 });
 
 app.post("/api/delete", (req, res) => {
@@ -320,7 +320,7 @@ function sendEmail(req, res) {
   getBookName(req, res, function(bookName) {
     getMailList(req, res, function(mailArray) {
       deleteMailList(req, res, function(delete_) {
-        if (mailArray.length === 0){
+        if (!mailArray || mailArray.length === 0){
           return;
         }
         for (let i = 0; i < mailArray.length - 1; i++) {
@@ -390,7 +390,7 @@ app.post("/api/email", (req, res) => {
   //console.log("book:" + req.body.isbn);
   //add the netid to transaction, how to write this sql? this is a array!
   let isbn = req.body.isbn;
-  if (netid === null){
+  if (netid === null) {
     res.send(401)
     return;
   }
@@ -410,5 +410,232 @@ app.post("/api/email", (req, res) => {
   );
   console.log("tid: " + netid);
 });
+
+
+
+app.get("/api/prices", (req, res) => {
+  let normp = [];
+  //let posts = [];
+  let option = {};
+
+  console.log("Checking Price");
+  const query = {
+    text:
+      "SELECT ((price-minPrice) / itv)::NUMERIC normp, post_time FROM \
+      uiuc.transaction \
+      CROSS JOIN \
+      (select MIN(groupStat.pri) minPrice, ((MAX(groupStat.pri) - MIN(groupStat.pri))::NUMERIC + 0.001) itv, groupStat.isbn from \
+      (SELECT ta.price pri, ta.isbn isbn, ta.post_time from uiuc.transaction AS ta) AS groupStat \
+      GROUP BY groupStat.isbn) AS h WHERE h.isbn=uiuc.transaction.isbn ORDER BY post_time",
+    values: []
+  }
+  client.query(query, (err, r) => {
+
+
+    var groupBy = function (xs, key) {
+
+      if (err) throw err;
+      //console.log(r.rows);
+
+      return xs.reduce(function (rv, x) {
+        (rv[x[key]] = rv[x[key]] || []).push(parseFloat(x));
+        return rv;
+      }, {});
+    };
+
+    let normp_array = groupBy(r.rows, "normp");
+    console.log(Object.keys(normp_array));
+
+    res.send({
+      option: {
+        title: {
+          show: true,
+          text: "Book Index",
+          left: '40%'
+        },
+        xAxis: {
+          type: 'category',
+          data: [],
+          name: "Relative Time",
+          left: '40%'
+        },
+        yAxis: {
+          type: 'value',
+          name: "Relative Price"
+        },
+        series: [{
+          data: Object.keys(normp_array),
+          type: 'line'
+        }]
+      }
+    });
+  }
+  )
+})
+
+
+app.get("/api/sold", (req, res) => {
+  const query = {
+    text: "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE sellerid = $1 AND buyerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
+    
+    values: [netid]//values: [req.query.id]
+  };
+
+  client.query(query, (err, r) => {
+    console.log(Object.keys(r.rows))
+    res.send({
+      option: {
+        backgroundColor: '#FAFAFA',
+
+        title: {
+          text: 'Sold Book',
+          left: 'center',
+          top: 20,
+          textStyle: {
+            color: '#000000'
+          }
+        },
+
+        tooltip: {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+
+        visualMap: {
+          show: false,
+          min: 0,
+          max: 6,
+          inRange: {
+            colorLightness: [0.1, 1]
+          }
+        },
+        series: [
+          {
+            name: 'Book',
+            type: 'pie',
+            radius: '55%',
+            center: ['50%', '50%'],
+            data: r.rows
+            .sort(function (a, b) { return a.value - b.value; }),
+            roseType: 'radius',
+            label: {
+              normal: {
+                textStyle: {
+                  color: 'rgba(10, 10, 10, 0.5)'
+                }
+              }
+            },
+            labelLine: {
+              normal: {
+                lineStyle: {
+                  color: 'rgba(10, 10, 10, 0.5)'
+                },
+                smooth: 0.2,
+                length: 10,
+                length2: 20
+              }
+            },
+            itemStyle: {
+              normal: {
+                color: '#2196F3',
+                shadowBlur: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
+
+            animationType: 'scale',
+            animationEasing: 'elasticOut',
+            animationDelay: function (idx) {
+              return Math.random() * 200;
+            }
+          }
+        ]
+      }
+     });
+  }
+)
+})
+
+
+app.get("/api/bought", (req, res) => {
+  const query = {
+    text: "SELECT count(*)::NUMERIC AS value, uiuc.book.name AS name FROM uiuc.transaction, uiuc.book WHERE buyerid = $1 AND sellerid IS NOT NULL AND uiuc.transaction.isbn = uiuc.book.isbn GROUP BY uiuc.book.name;",
+    values: [netid]//values: [req.query.id]
+  };
+
+  client.query(query, (err, r) => {
+    console.log(Object.keys(r.rows))
+    res.send({
+      option: {
+        backgroundColor: '#FAFAFA',
+
+        title: {
+          text: 'Bought Book',
+          left: 'center',
+          top: 0,
+          textStyle: {
+            color: '#000000'
+          }
+        },
+
+        tooltip: {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+
+        visualMap: {
+          show: false,
+          min: 0,
+          max: 6,
+          inRange: {
+            colorLightness: [0.1, 1]
+          }
+        },
+        series: [
+          {
+            name: 'book',
+            type: 'pie',
+            radius: '55%',
+            center: ['50%', '50%'],
+            data: r.rows
+            .sort(function (a, b) { return a.value - b.value; }),
+            roseType: 'radius',
+            label: {
+              normal: {
+                textStyle: {
+                  color: 'rgba(10, 10, 10, 0.5)'
+                }
+              }
+            },
+            labelLine: {
+              normal: {
+                lineStyle: {
+                  color: 'rgba(10, 10, 10, 0.5)'
+                },
+                smooth: 0.2,
+                length: 10,
+                length2: 20
+              }
+            },
+            itemStyle: {
+              normal: {
+                color: '#2196F3',
+                shadowBlur: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
+
+            animationType: 'scale',
+            animationEasing: 'elasticOut',
+            animationDelay: function (idx) {
+              return Math.random() * 200;
+            }
+          }
+        ]
+      }
+     });
+  }
+)
+})
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
