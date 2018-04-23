@@ -426,7 +426,7 @@ app.get("/api/prices", (req, res) => {
       CROSS JOIN \
       (select MIN(groupStat.pri) minPrice, ((MAX(groupStat.pri) - MIN(groupStat.pri))::NUMERIC + 0.001) itv, groupStat.isbn from \
       (SELECT ta.price pri, ta.isbn isbn, ta.post_time from uiuc.transaction AS ta) AS groupStat \
-      GROUP BY groupStat.isbn) AS h WHERE h.isbn=uiuc.transaction.isbn ORDER BY post_time",
+      GROUP BY groupStat.isbn) AS h WHERE h.isbn=uiuc.transaction.isbn AND uiuc.transaction.tid>310 ORDER BY post_time",
     values: []
   }
   client.query(query, (err, r) => {
@@ -572,7 +572,7 @@ app.get("/api/recommendation", (req, res) =>{
 
   const query = {
     text: "SELECT ts.cnt AS value, uiuc.book.name AS name FROM\
-    (select isbn, count(*) cnt from (select ISBN from (select count(*), isbn from uiuc.transaction group by isbn) as f NATURAL JOIN uiuc.transaction ORDER BY count DESC) as gg group by isbn)  AS ts, uiuc.book WHERE ts.isbn = uiuc.book.isbn ORDER BY CNT DESC LIMIT 8 ",
+    (select isbn, count(*) cnt from (select ISBN from (select count(*), isbn from uiuc.transaction WHERE isbn <> '9780738092522' group by isbn) as f NATURAL JOIN uiuc.transaction ORDER BY count DESC) as gg group by isbn)  AS ts, uiuc.book WHERE ts.isbn = uiuc.book.isbn ORDER BY CNT DESC LIMIT 8 ",
     values: []//values: [req.query.id]
   };
 
