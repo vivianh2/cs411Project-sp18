@@ -114,7 +114,7 @@ app.get("/api/search", (req, res) => {
   console.log("Search " + req.query.q);
   let query;
   if (isNaN(req.query.q)) {
-    if(isNaN(parseFloat(req.query.q.split(" ")[1])) == true){
+    if (isNaN(parseFloat(req.query.q.split(" ")[1])) == true) {
       query = {
         text:
           "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
@@ -124,7 +124,7 @@ app.get("/api/search", (req, res) => {
              FROM uiuc.book WHERE name = $1",
         values: [req.query.q]
       };
-    }else{
+    } else {
       query = {
         text:
           "SELECT TID, Condition, Price, SellerId, ISBN, img_url \
@@ -160,7 +160,9 @@ app.get("/api/search", (req, res) => {
 
     for (let isbn in isbn_transaction) {
       books.push({ isbn: isbn });
-      posts.push(isbn_transaction[isbn].slice(0, isbn_transaction[isbn].length-1));
+      posts.push(
+        isbn_transaction[isbn].slice(0, isbn_transaction[isbn].length - 1)
+      );
     }
 
     res.send({
