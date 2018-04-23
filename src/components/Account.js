@@ -7,7 +7,7 @@ import { ListItemIcon, ListItemText } from "material-ui/List";
 import AccountIcon from "material-ui-icons/AccountCircle";
 import HistoryIcon from "material-ui-icons/History";
 import ReactEcharts from 'echarts-for-react';
-
+import echarts from 'echarts';
 import Ratings from "./Ratings";
 import History from "./History";
 
@@ -34,6 +34,7 @@ class Account extends Component {
     rating: 0,
     option_sold: {},
     option_bought: {},
+    option_recommand: {},
     selectedItem: "account",
   };
 
@@ -41,11 +42,11 @@ class Account extends Component {
 
   componentWillUnmount() {
 
-
   }
 
 
   componentDidMount() {
+    
     this.getAccount(this.state.netid)
       .then(res =>
         this.setState({
@@ -54,15 +55,15 @@ class Account extends Component {
       )
       .catch(err => console.log(err));
 
-    // this.getPriceChart(this.state.netid)
-    //   .then(res => {
-    //     this.setState({
-    //       option_prices: res.option
-    //     })
-    //     console.log("option_data is: " + this.state.option_data)
-    //   }
-    //   ).catch(err => console.log(err));
-    
+    this.getRecommandChart(this.state.netid)
+      .then(res => {
+        this.setState({
+          option_recommand: res.option
+        })
+        console.log("option_data is: " + this.state.option_data)
+      }
+      ).catch(err => console.log(err));
+
     this.getSoldChart(this.state.netid).then(res => {
       this.setState({
         option_sold: res.option
@@ -78,6 +79,10 @@ class Account extends Component {
       console.log("option_bought is: " + this.state.option_bought)
     }
     ).catch(err => console.log(err));
+  
+    var myChart = echarts.init(document.getElementById('main'), 'light')
+    myChart.setOption(this.state.option_recommand)
+    
   }
 
   getAccount = async netid => {
@@ -105,12 +110,22 @@ class Account extends Component {
     return body;
   };
 
+  getRecommandChart = async netid => {
+    //const response = await fetch("/api/bought?id=" + netid);
+    const response = await fetch("/api/recommendation");
+    const body = await response.json();
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
+
   menuClick = (value) => {
     this.setState({
       selectedItem: value,
     })
     console.log(this.state.selectedItem)
   }
+
+  
 
   render() {
     const { classes } = this.props;
@@ -164,11 +179,17 @@ class Account extends Component {
 
                 <ReactEcharts
                   option={this.state.option_bought}
-                  style={{ height: '300px', padding: '25px' }}
+                  style={{ height: '300px' }}
                   opts={{ renderer: 'svg' }} // use svg to render the chart.
                 />
 
-
+                <ReactEcharts
+                  option={this.state.option_recommand}
+                  style={{ height: '300px' }}
+                  opts={{ renderer: 'svg' }} // use svg to render the chart.
+                />
+                <div id="main" opts={{ renderer: 'svg' }}
+                style={{width: 500, height:500}}></div>
               </React.Fragment>
             )
           }

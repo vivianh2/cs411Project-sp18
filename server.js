@@ -505,7 +505,7 @@ app.get("/api/sold", (req, res) => {
         visualMap: {
           show: false,
           min: 0,
-          max: 6,
+          max: 4,
           inRange: {
             colorLightness: [0.1, 1]
           }
@@ -587,7 +587,7 @@ app.get("/api/bought", (req, res) => {
         visualMap: {
           show: false,
           min: 0,
-          max: 6,
+          max: 3,
           inRange: {
             colorLightness: [0.1, 1]
           }
@@ -638,5 +638,47 @@ app.get("/api/bought", (req, res) => {
   }
 )
 })
+
+app.get("/api/recommendation", (req, res) =>{
+
+  const query = {
+    text: "SELECT ts.cnt AS value, uiuc.book.name AS name FROM\
+    (select isbn, count(*) cnt from (select ISBN from (select count(*), isbn from uiuc.transaction group by isbn) as f NATURAL JOIN uiuc.transaction ORDER BY count DESC) as gg group by isbn)  AS ts, uiuc.book WHERE ts.isbn = uiuc.book.isbn ORDER BY CNT DESC LIMIT 8 ",
+    values: []//values: [req.query.id]
+  };
+
+  client.query(query, (err, r) => {
+    //console.log(Object.keys(r.rows))
+    res.send({
+      
+   option: {
+        title : {
+            text: 'Recommendation',
+            x:'center'
+        },
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        toolbox: {
+            show : true,
+            
+        },
+        calculable : true,
+        series : [
+            {
+                name:'recommend',
+                type:'pie',
+                radius : [30, 110],
+                roseType : 'area',
+                data: r.rows
+            }
+        ]
+    }
+     });
+  }
+)
+})
+
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
