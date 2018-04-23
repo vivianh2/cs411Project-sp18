@@ -6,8 +6,8 @@ import { MenuList, MenuItem } from "material-ui/Menu";
 import { ListItemIcon, ListItemText } from "material-ui/List";
 import AccountIcon from "material-ui-icons/AccountCircle";
 import HistoryIcon from "material-ui-icons/History";
-import ReactEcharts from 'echarts-for-react';
-import echarts from 'echarts';
+import ReactEcharts from "echarts-for-react";
+import echarts from "echarts";
 
 import Ratings from "./Ratings";
 import History from "./History";
@@ -36,13 +36,12 @@ class Account extends Component {
     option_sold: {},
     option_bought: {},
     option_recommand: {},
-    selectedItem: "account",
+    selectedItem: "account"
   };
 
   componentWillUnmount() {}
 
   componentDidMount() {
-    
     this.getAccount(this.state.netid)
       .then(res =>
         this.setState({
@@ -55,29 +54,28 @@ class Account extends Component {
       .then(res => {
         this.setState({
           option_recommand: res.option
-        })
-        console.log("option_data is: " + this.state.option_data)
-      }
-      ).catch(err => console.log(err));
-
-    this.getSoldChart(this.state.netid).then(res => {
-      this.setState({
-        option_sold: res.option
+        });
+        console.log("option_data is: " + this.state.option_data);
       })
       .catch(err => console.log(err));
 
-    this.getBoughtChart(this.state.netid)
+    this.getSoldChart(this.state.netid)
       .then(res => {
         this.setState({
-          option_bought: res.option
+          option_sold: res.option
+        }).catch(err => console.log(err));
+
+        this.getBoughtChart(this.state.netid).then(res => {
+          this.setState({
+            option_bought: res.option
+          });
         });
+        console.log("option_bought is: " + this.state.option_bought);
       })
-      console.log("option_bought is: " + this.state.option_bought)
-    }
-    ).catch(err => console.log(err));
-  
-    var myChart = echarts.init(document.getElementById('main'), 'light')
-    myChart.setOption(this.state.option_recommand)
+      .catch(err => console.log(err));
+
+    var myChart = echarts.init(document.getElementById("main"), "light");
+    myChart.setOption(this.state.option_recommand);
   }
 
   getAccount = async netid => {
@@ -112,14 +110,12 @@ class Account extends Component {
     return body;
   };
 
-  menuClick = (value) => {
+  menuClick = value => {
     this.setState({
       selectedItem: value
     });
     console.log(this.state.selectedItem);
   };
-
-  
 
   render() {
     const { classes } = this.props;
@@ -158,45 +154,43 @@ class Account extends Component {
           </MenuList>
         </Grid>
         <Grid item md={10}>
-          {
-            this.state.selectedItem === "account" &&
-            (
-              <React.Fragment>
-                <Typography
-                  variant="headline"
-                  align="left"
-                  color="inherit"
-                  style={{ margin: "1% 2%" }}
-                >
-                  {this.state.username}
-                </Typography>
-                <Ratings rating={this.state.rating} />
+          {this.state.selectedItem === "account" && (
+            <React.Fragment>
+              <Typography
+                variant="headline"
+                align="left"
+                color="inherit"
+                style={{ margin: "1% 2%" }}
+              >
+                {this.state.username}
+              </Typography>
+              <Ratings rating={this.state.rating} />
 
-                <ReactEcharts
-                  option={this.state.option_sold}
-                  style={{ height: '300px' }}
-                  opts={{ renderer: 'svg' }} // use svg to render the chart.
-                />
+              <ReactEcharts
+                option={this.state.option_sold}
+                style={{ height: "300px" }}
+                opts={{ renderer: "svg" }} // use svg to render the chart.
+              />
 
+              <ReactEcharts
+                option={this.state.option_bought}
+                style={{ height: "300px" }}
+                opts={{ renderer: "svg" }} // use svg to render the chart.
+              />
 
-                <ReactEcharts
-                  option={this.state.option_bought}
-                  style={{ height: '300px' }}
-                  opts={{ renderer: 'svg' }} // use svg to render the chart.
-                />
-
-                <ReactEcharts
-                  option={this.state.option_recommand}
-                  style={{ height: '300px' }}
-                  opts={{ renderer: 'svg' }} // use svg to render the chart.
-                />
-                <div id="main" opts={{ renderer: 'svg' }}
-                style={{width: 500, height:500}}></div>
-              </React.Fragment>
-            )
-          }
-          {
-            this.state.selectedItem === "history" &&
+              <ReactEcharts
+                option={this.state.option_recommand}
+                style={{ height: "300px" }}
+                opts={{ renderer: "svg" }} // use svg to render the chart.
+              />
+              <div
+                id="main"
+                opts={{ renderer: "svg" }}
+                style={{ width: 500, height: 500 }}
+              />
+            </React.Fragment>
+          )}
+          {this.state.selectedItem === "history" && (
             <History netid={this.state.netid} />
           )}
         </Grid>
