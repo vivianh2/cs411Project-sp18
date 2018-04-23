@@ -10,10 +10,10 @@ class App extends Component {
     return (
       <div className="App">
         <div id="main">
-          <p>Enter the <del>book name,</del> class name or ISBN to start search.</p>
+          <p>Enter the book name, class name or ISBN to start search.</p>
           <Search/>
         </div>
-        <Trend netid="haonan3" />
+        <Trend />
       </div>
     );
   }

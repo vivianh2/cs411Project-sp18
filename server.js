@@ -450,7 +450,7 @@ app.get("/api/prices", (req, res) => {
       option: {
         title: {
           show: true,
-          text: "Book Index",
+          text: "Overall Book Price Trend",
           left: '45%'
         },
         xAxis: {
