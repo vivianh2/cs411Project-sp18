@@ -485,73 +485,37 @@ app.get("/api/sold", (req, res) => {
   client.query(query, (err, r) => {
     console.log(Object.keys(r.rows))
     res.send({
-      option: {
-        backgroundColor: '#FAFAFA',
-
-        title: {
-          text: 'Sold Book',
-          left: 'center',
-          top: 20,
-          textStyle: {
-            color: '#000000'
-          }
+      option : {
+        title : {
+            text: 'Sold Book',
+            x:'center'
         },
-
-        tooltip: {
-          trigger: 'item',
-          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
         },
-
-        visualMap: {
-          show: false,
-          min: 0,
-          max: 4,
-          inRange: {
-            colorLightness: [0.1, 1]
-          }
+        legend: {
+            orient: 'vertical',
+            left: 'left',
+            data: []
         },
-        series: [
-          {
-            name: 'Book',
-            type: 'pie',
-            radius: '55%',
-            center: ['50%', '50%'],
-            data: r.rows
-            .sort(function (a, b) { return a.value - b.value; }),
-            roseType: 'radius',
-            label: {
-              normal: {
-                textStyle: {
-                  color: 'rgba(10, 10, 10, 0.5)'
+        series : [
+            {
+                name: 'Book:',
+                type: 'pie',
+                radius : '55%',
+                center: ['50%', '60%'],
+                data:r.rows,
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
                 }
-              }
-            },
-            labelLine: {
-              normal: {
-                lineStyle: {
-                  color: 'rgba(10, 10, 10, 0.5)'
-                },
-                smooth: 0.2,
-                length: 10,
-                length2: 20
-              }
-            },
-            itemStyle: {
-              normal: {
-                color: '#2196F3',
-                shadowBlur: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            },
-
-            animationType: 'scale',
-            animationEasing: 'elasticOut',
-            animationDelay: function (idx) {
-              return Math.random() * 200;
             }
-          }
         ]
-      }
+    }
      });
   }
 )
@@ -567,73 +531,38 @@ app.get("/api/bought", (req, res) => {
   client.query(query, (err, r) => {
     console.log(Object.keys(r.rows))
     res.send({
-      option: {
-        backgroundColor: '#FAFAFA',
-
-        title: {
-          text: 'Bought Book',
-          left: 'center',
-          top: 0,
-          textStyle: {
-            color: '#000000'
-          }
+      option : {
+        title : {
+            text: 'Bought Book',
+            x:'center'
         },
-
-        tooltip: {
-          trigger: 'item',
-          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
         },
-
-        visualMap: {
-          show: false,
-          min: 0,
-          max: 3,
-          inRange: {
-            colorLightness: [0.1, 1]
-          }
+        legend: {
+            orient: 'vertical',
+            left: 'left',
+            data: []
         },
-        series: [
-          {
-            name: 'book',
-            type: 'pie',
-            radius: '55%',
-            center: ['50%', '50%'],
-            data: r.rows
-            .sort(function (a, b) { return a.value - b.value; }),
-            roseType: 'radius',
-            label: {
-              normal: {
-                textStyle: {
-                  color: 'rgba(10, 10, 10, 0.5)'
+        series : [
+            {
+                name: 'Book:',
+                type: 'pie',
+                radius : '55%',
+                center: ['50%', '60%'],
+                data:r.rows,
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
                 }
-              }
-            },
-            labelLine: {
-              normal: {
-                lineStyle: {
-                  color: 'rgba(10, 10, 10, 0.5)'
-                },
-                smooth: 0.2,
-                length: 10,
-                length2: 20
-              }
-            },
-            itemStyle: {
-              normal: {
-                color: '#2196F3',
-                shadowBlur: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            },
-
-            animationType: 'scale',
-            animationEasing: 'elasticOut',
-            animationDelay: function (idx) {
-              return Math.random() * 200;
             }
-          }
         ]
-      }
+    }
+
      });
   }
 )
@@ -664,12 +593,17 @@ app.get("/api/recommendation", (req, res) =>{
             show : true,
             
         },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          data: []
+      },
         calculable : true,
         series : [
             {
-                name:'recommend',
+                name:'Recommend Book:',
                 type:'pie',
-                radius : [30, 110],
+                radius : [20, 85],
                 roseType : 'area',
                 data: r.rows
             }
