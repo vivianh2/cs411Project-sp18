@@ -12,6 +12,8 @@ import Table, {
   TablePagination,
   TableRow
 } from "material-ui/Table";
+import Popover from "material-ui/Popover";
+
 import IconButton from "material-ui/IconButton";
 import FirstPageIcon from "material-ui-icons/FirstPage";
 import EditIcon from "material-ui-icons/Edit";
@@ -21,6 +23,10 @@ import KeyboardArrowRight from "material-ui-icons/KeyboardArrowRight";
 import LastPageIcon from "material-ui-icons/LastPage";
 import Modal from "material-ui/Modal";
 import TextField from "material-ui/TextField";
+
+import Rating from "react-rating";
+import yellow from "material-ui/colors/yellow";
+import StarIcon from "material-ui-icons/Star";
 
 const actionsStyles = theme => ({
   root: {
@@ -131,6 +137,14 @@ const styles = theme => ({
   },
   update: {
     float: "right"
+  },
+  star_on: {
+    margin: theme.spacing.unit,
+    color: yellow[500]
+  },
+  star_off: {
+    margin: theme.spacing.unit,
+    color: "#9E9E9E"
   }
 });
 
@@ -141,7 +155,10 @@ class History extends Component {
     rowsPerPage: 5,
     open: false,
     price: -1,
-    buyer: null
+    buyer: null,
+    id: -1,
+    ratingOpen: false,
+    rating: 0
   };
 
   componentDidMount() {
@@ -173,19 +190,21 @@ class History extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
-  handleOpen = (price) => {
+  handleOpen = (price, id) => {
     this.setState({
       open: true,
       price: price,
-      buyer: null
-     });
+      buyer: "",
+      id: id
+    });
   };
 
   handleClose = () => {
     this.setState({
       open: false,
       price: -1,
-      buyer: null
+      buyer: "",
+      id: -1
     });
   };
 
@@ -193,6 +212,27 @@ class History extends Component {
     this.setState({
       [name]: event.target.value
     });
+  };
+
+  handleRatingOpen = id => {
+    this.setState({
+      ratingOpen: true,
+      rating: 0,
+      id: id
+    });
+  };
+
+  handleRatingClose = () => {
+    console.log(this.state.rating)
+    console.log(this.state.id)
+    let that = this;
+    this.rate(this.state.id, function () {
+      that.setState({
+        ratingOpen: false,
+        rating: 0,
+        id: -1
+      });
+    })
   };
 
   postData(url, data) {
@@ -212,7 +252,7 @@ class History extends Component {
   }
 
   received = id => {
-    console.log("received " + id)
+    console.log("received " + id);
     this.postData("/api/received", { tid: this.state.history[id].tid }).then(
       response => {
         if (response.ok) {
@@ -229,7 +269,7 @@ class History extends Component {
   };
 
   delete = id => {
-    console.log("delete " + id)
+    console.log("delete " + id);
     this.postData("/api/delete", { tid: this.state.history[id].tid }).then(
       response => {
         if (response.ok) {
@@ -240,36 +280,67 @@ class History extends Component {
               item.id = index;
               return item;
             })
-          })
+          });
         }
       }
     );
   };
 
   update = id => {
-    console.log("update " + id)
+    console.log("update " + id);
     let that = this;
     this.postData("/api/update", {
       tid: this.state.history[id].tid,
       price: this.state.price,
       buyer: this.state.buyer
-    }).then(
-      response => {
-        if (response.ok){
-          response.json().then(result => {
-            let history = this.state.history;
-            history[id].price = result.price;
-            history[id].buyerid = result.buyer;
-            this.setState({
-              history: history
-            });
-            that.handleClose();
+    }).then(response => {
+      if (response.ok) {
+        response.json().then(result => {
+          let history = this.state.history;
+          history[id].price = result.price;
+          history[id].buyerid = result.buyer;
+          console.log(history);
+          this.setState({
+            history: history
           });
-        } else{
-          alert(response.status + " " + response.statusText);
-        }
+          that.handleClose();
+        });
+      } else {
+        alert(response.status + " " + response.statusText);
       }
-    );
+    });
+  };
+
+  rate = (id, callback) => {
+    console.log("rate " + id);
+    let that = this;
+    let url;
+    if (this.props.netid === this.state.history[id].sellerid) {
+      url = "/api/rate/buyer";
+    } else {
+      url = "/api/rate/seller";
+    }
+    this.postData(url, {
+      tid: this.state.history[id].tid,
+      rating: this.state.rating
+    }).then(response => {
+      if (response.ok) {
+        response.json().then(result => {
+          let history = this.state.history;
+          history[id].buyer_rating = result.buyer_rating;
+          history[id].seller_rating = result.seller_rating;
+          console.log(history);
+          this.setState({
+            history: history
+          });
+          alert("rating received")
+          callback()
+        });
+      } else {
+        alert(response.status + " " + response.statusText);
+        callback()
+      }
+    });
   };
 
   render() {
@@ -329,7 +400,7 @@ class History extends Component {
                               n.buyerid === null
                             )
                           }
-                          onClick={() => this.handleOpen(n.price)}
+                          onClick={() => this.handleOpen(n.price, n.id)}
                         >
                           <EditIcon />
                         </IconButton>
@@ -350,7 +421,7 @@ class History extends Component {
                               className={classes.textField}
                               margin="normal"
                               value={this.state.buyer}
-                              onChange={this.handleChange('buyer')}
+                              onChange={this.handleChange("buyer")}
                             />
                             <br />
                             <TextField
@@ -359,10 +430,14 @@ class History extends Component {
                               className={classes.textField}
                               margin="normal"
                               value={this.state.price}
-                              onChange={this.handleChange('price')}
+                              onChange={this.handleChange("price")}
                             />
                             <br />
-                            <Button color="primary" className={classes.update} onClick={() => this.update(n.id)}>
+                            <Button
+                              color="primary"
+                              className={classes.update}
+                              onClick={() => this.update(this.state.id)}
+                            >
                               Update
                             </Button>
                           </div>
@@ -378,6 +453,46 @@ class History extends Component {
                         >
                           <DeleteIcon />
                         </IconButton>
+
+                        <IconButton
+                          className={classes.button}
+                          aria-label="Rate"
+                          color="primary"
+                          disabled={
+                            !(
+                              (this.props.netid === n.buyerid &&
+                                n.seller_rating === null) ||
+                              (this.props.netid === n.sellerid &&
+                                n.buyer_rating === null &&
+                                n.buyerid !== null)
+                            )
+                          }
+                          onClick={() => this.handleRatingOpen(n.id)}
+                        >
+                          <StarIcon />
+                        </IconButton>
+                        <Popover
+                          open={this.state.ratingOpen}
+                          onClose={this.handleRatingClose}
+                          anchorEl={this.anchorEl}
+                          anchorReference="anchorEl"
+                          transformOrigin={{
+                            vertical: "top",
+                            horizontal: "right"
+                          }}
+                        >
+                          <Rating
+                            {...this.props}
+                            emptySymbol={
+                              <StarIcon className={classes.star_off} />
+                            }
+                            fullSymbol={
+                              <StarIcon className={classes.star_on} />
+                            }
+                            initialRating={this.state.rating}
+                            onChange={(rate) => this.setState({ rating: rate })}
+                          />
+                        </Popover>
                       </TableCell>
                     </TableRow>
                   );

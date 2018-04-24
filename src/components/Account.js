@@ -32,7 +32,8 @@ class Account extends Component {
   state = {
     netid: this.props.location.state.netid,
     username: this.props.location.state.username,
-    rating: 0,
+    buyer_rating: 0,
+    seller_rating: 0,
     option_sold: {},
     option_bought: {},
     option_recommand: {},
@@ -45,7 +46,8 @@ class Account extends Component {
     this.getAccount(this.state.netid)
       .then(res =>
         this.setState({
-          rating: res.rating
+          buyer_rating: res.buyer_rating,
+          seller_rating: res.seller_rating
         })
       )
       .catch(err => console.log(err));
@@ -161,7 +163,8 @@ class Account extends Component {
               >
                 {this.state.username}
               </Typography>
-              <Ratings rating={this.state.rating} />
+              <Ratings rating={this.state.buyer_rating} text="Buyer rating"/>
+              <Ratings rating={this.state.seller_rating} text="Seller rating"/>
 
               <ReactEcharts
                 option={this.state.option_sold}
