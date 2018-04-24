@@ -625,5 +625,9 @@ app.get("/api/recommendation", (req, res) =>{
   });
 });
 
+app.post("/api/rate", (req, res) => {
+  console.log(req.body.rating)
+})
+
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

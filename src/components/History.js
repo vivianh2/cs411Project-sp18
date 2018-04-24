@@ -21,6 +21,7 @@ import KeyboardArrowRight from "material-ui-icons/KeyboardArrowRight";
 import LastPageIcon from "material-ui-icons/LastPage";
 import Modal from "material-ui/Modal";
 import TextField from "material-ui/TextField";
+import StarIcon from "material-ui-icons/Star";
 
 const actionsStyles = theme => ({
   root: {
@@ -131,7 +132,7 @@ const styles = theme => ({
   },
   update: {
     float: "right"
-  }
+  },
 });
 
 class History extends Component {
@@ -377,6 +378,14 @@ class History extends Component {
                           onClick={() => this.delete(n.id)}
                         >
                           <DeleteIcon />
+                        </IconButton>
+
+                        <IconButton
+                          className={classes.button}
+                          aria-label="Rate"
+                          color="primary"
+                        >
+                          <StarIcon />
                         </IconButton>
                       </TableCell>
                     </TableRow>
