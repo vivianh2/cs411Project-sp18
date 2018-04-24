@@ -333,6 +333,7 @@ class History extends Component {
           this.setState({
             history: history
           });
+          alert("rating received")
           callback()
         });
       } else {
