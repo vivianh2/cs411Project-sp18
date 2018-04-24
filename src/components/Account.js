@@ -33,7 +33,38 @@ class Account extends Component {
     netid: this.props.location.state.netid,
     username: this.props.location.state.username,
     rating: 0,
-    option_sold: {},
+    option_sold: {
+      title : {
+          text: 'Sold Book',
+          x:'center'
+      },
+      tooltip : {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+      },
+      legend: {
+          orient: 'vertical',
+          left: 'left',
+          data: []
+      },
+      series : [
+          {
+              name: 'Book:',
+              type: 'pie',
+              radius : '55%',
+              center: ['50%', '60%'],
+              data:[0],
+              itemStyle: {
+                  emphasis: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: 'rgba(0, 0, 0, 0.5)'
+                  }
+              }
+          }
+      ]
+  },
+
     option_bought: {},
     option_recommand: {},
     selectedItem: "account"
