@@ -80,13 +80,16 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/account", (req, res) => {
   console.log("Account " + req.query.id);
   const query = {
-    text: "SELECT Rating FROM uiuc.User WHERE NETID = $1",
+    text: "SELECT AVG(buyer_rating) as buyer_rating, -2 as seller_rating FROM uiuc.transaction WHERE buyerid = $1 UNION SELECT -2, AVG(seller_rating) as seller_rating FROM uiuc.transaction WHERE sellerid = $1",
     values: [req.query.id]
   };
 
   client.query(query, (err, r) => {
     if (err) throw err;
-    res.send({ rating: r.rows[0].rating });
+    res.send({
+      buyer_rating: r.rows[1].buyer_rating,
+      seller_rating: r.rows[0].seller_rating
+    });
   });
 });
 
@@ -588,7 +591,7 @@ app.get("/api/recommendation", (req, res) =>{
   client.query(query, (err, r) => {
     //console.log(Object.keys(r.rows))
     res.send({
-      
+
    option: {
         title : {
             text: 'Recommendation',
@@ -600,7 +603,7 @@ app.get("/api/recommendation", (req, res) =>{
         },
         toolbox: {
             show : true,
-            
+
         },
         legend: {
           orient: 'vertical',

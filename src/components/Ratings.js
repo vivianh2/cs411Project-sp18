@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import yellow from 'material-ui/colors/yellow';
 import Icon from 'material-ui/Icon';
+import Typography from 'material-ui/Typography';
 
 const styles = theme => ({
   root: {
@@ -30,7 +31,16 @@ function Ratings(props) {
 
   return (
     <div className={classes.root}>
+      <Typography variant="body2">
+        {props.text}
+      </Typography>
       {stars}
+      {
+        props.rating === -1 &&
+        <Typography variant="body1">
+          Not enough rating
+        </Typography>
+      }
     </div>
   );
 }
