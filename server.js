@@ -159,7 +159,6 @@ app.get("/api/search", (req, res) => {
     let posts = [];
 
     let isbn_transaction = groupBy(r.rows, "isbn");
-    console.log(isbn_transaction);
 
     for (let isbn in isbn_transaction) {
       books.push({ isbn: isbn });
@@ -179,15 +178,14 @@ app.get("/api/history", (req, res) => {
   console.log("History " + req.query.id);
   const query = {
     text:
-      "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time, t.price \
+      "SELECT t.tid, b.name, t.buyerid, t.sellerid, t.post_time, t.sell_time, t.price, t.buyer_rating, t.seller_rating \
        FROM uiuc.transaction t, uiuc.book b, uiuc.user u \
-       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid\
+       WHERE (t.buyerid = $1 OR t.sellerid = $1) AND t.isbn = b.isbn AND t.sellerid = u.netid \
        ORDER BY t.post_time DESC",
     values: [req.query.id]
   };
   client.query(query, (err, r) => {
     if (err) throw err;
-    console.log(r.rows);
     res.send({ history: r.rows });
   });
 });
@@ -625,9 +623,37 @@ app.get("/api/recommendation", (req, res) =>{
   });
 });
 
-app.post("/api/rate", (req, res) => {
+app.post("/api/rate/buyer", (req, res) => {
+  console.log("Rate buyer " + req.body.tid);
   console.log(req.body.rating)
-})
+  const query = {
+    text: "UPDATE uiuc.transaction SET buyer_rating = $1 WHERE tid = $2",
+    values: [req.body.rating, req.body.tid]
+  };
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    res.send({
+      buyer_rating: req.body.rating,
+      seller_rating: null,
+    });
+  });
+});
+
+app.post("/api/rate/seller", (req, res) => {
+  console.log("Rate seller " + req.body.tid);
+  console.log(req.body.rating)
+  const query = {
+    text: "UPDATE uiuc.transaction SET buyer_seller = $1 WHERE tid = $2",
+    values: [req.body.rating, req.body.tid]
+  };
+  client.query(query, (err, r) => {
+    if (err) throw err;
+    res.send({
+      buyer_rating: null,
+      seller_rating: req.body.rating,
+    });
+  });
+});
 
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
