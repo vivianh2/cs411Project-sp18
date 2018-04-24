@@ -39,7 +39,7 @@ class Account extends Component {
     selectedItem: "account"
   };
 
-  componentWillUnmount() {}
+  componentWillUnmount() { }
 
   componentDidMount() {
     this.getAccount(this.state.netid)
@@ -64,18 +64,15 @@ class Account extends Component {
         this.setState({
           option_sold: res.option
         }).catch(err => console.log(err));
-
-        this.getBoughtChart(this.state.netid).then(res => {
-          this.setState({
-            option_bought: res.option
-          });
-        });
         console.log("option_bought is: " + this.state.option_bought);
       })
       .catch(err => console.log(err));
 
-    var myChart = echarts.init(document.getElementById("main"), "light");
-    myChart.setOption(this.state.option_recommand);
+    this.getBoughtChart(this.state.netid).then(res => {
+      this.setState({
+        option_bought: res.option
+      });
+    });
   }
 
   getAccount = async netid => {
@@ -183,11 +180,7 @@ class Account extends Component {
                 style={{ height: "300px" }}
                 opts={{ renderer: "svg" }} // use svg to render the chart.
               />
-              <div
-                id="main"
-                opts={{ renderer: "svg" }}
-                style={{ width: 500, height: 500 }}
-              />
+
             </React.Fragment>
           )}
           {this.state.selectedItem === "history" && (
