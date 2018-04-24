@@ -450,7 +450,7 @@ app.get("/api/prices", (req, res) => {
       return xs.reduce(function(rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(parseFloat(x));
         return rv;
-      }, {});
+      }, {});ƒ
     };
 
     let normp_array = groupBy(r.rows, "normp");
