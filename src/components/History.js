@@ -212,6 +212,7 @@ class History extends Component {
   }
 
   received = id => {
+    console.log("received " + id)
     this.postData("/api/received", { tid: this.state.history[id].tid }).then(
       response => {
         if (response.ok) {
@@ -228,20 +229,25 @@ class History extends Component {
   };
 
   delete = id => {
+    console.log("delete " + id)
     this.postData("/api/delete", { tid: this.state.history[id].tid }).then(
       response => {
         if (response.ok) {
           let history = this.state.history;
           history.splice(id, 1);
           this.setState({
-            history: history
-          });
+            history: history.map((item, index) => {
+              item.id = index;
+              return item;
+            })
+          })
         }
       }
     );
   };
 
   update = id => {
+    console.log("update " + id)
     let that = this;
     this.postData("/api/update", {
       tid: this.state.history[id].tid,
